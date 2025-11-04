@@ -13,7 +13,6 @@ export function SellThunder() {
   
   const { writeContract, isPending } = useWriteContract();
 
-  // Get Thunder balance
   const { data: thunderBalance } = useReadContract({
     address: THUNDER_CONTRACT as `0x${string}`,
     abi: ThunderABI,
@@ -21,7 +20,6 @@ export function SellThunder() {
     args: address ? [address] : undefined,
   });
 
-  // Get sell price
   const { data: sellPrice } = useReadContract({
     address: THUNDER_CONTRACT as `0x${string}`,
     abi: ThunderABI,
@@ -48,8 +46,7 @@ export function SellThunder() {
     <div className="glass-card p-8 space-y-6">
       <h2 className="text-3xl font-bold thunder-gradient text-center">💸 Sell Thunder</h2>
       
-<div className="space-y-4" suppressHydrationWarning>
-
+      <div className="space-y-4" suppressHydrationWarning>
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Thunder Amount
@@ -66,21 +63,27 @@ export function SellThunder() {
           />
         </div>
 
-        {sellPrice && (
+        {sellPrice != null && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               You'll receive: <span className="thunder-gradient font-bold">
-                ${(Number(String(sellPrice)) / 1_000_000).toFixed(4)} USDC
+                ${(() => {
+                  const price = Number(sellPrice.toString());
+                  return (price / 1_000_000).toFixed(4);
+                })()} USDC
               </span>
             </p>
           </div>
         )}
 
-        {thunderBalance && (
+        {thunderBalance != null && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               Your Thunder: <span className="font-bold">
-                {(Number(String(thunderBalance)) / 1e18).toFixed(0)} ⚡
+                {(() => {
+                  const balance = Number(thunderBalance.toString());
+                  return (balance / 1e18).toFixed(0);
+                })()} ⚡
               </span>
             </p>
           </div>

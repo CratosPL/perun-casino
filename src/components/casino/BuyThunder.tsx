@@ -79,8 +79,7 @@ export function BuyThunder() {
     <div className="glass-card p-8 space-y-6">
       <h2 className="text-3xl font-bold thunder-gradient text-center">⚡ Buy Thunder</h2>
       
-<div className="space-y-4" suppressHydrationWarning>
-
+      <div className="space-y-4" suppressHydrationWarning>
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Thunder Amount
@@ -97,11 +96,14 @@ export function BuyThunder() {
           />
         </div>
 
-        {buyPrice && (
+        {buyPrice != null && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               Price: <span className="thunder-gradient font-bold">
-                ${(Number(String(buyPrice)) / 1_000_000).toFixed(4)} USDC
+                ${(() => {
+                  const price = Number(buyPrice.toString());
+                  return (price / 1_000_000).toFixed(4);
+                })()} USDC
               </span>
             </p>
           </div>
