@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const manifest = {
+    accountAssociation: {
+      header: "eyJmaWQiOjMzMjMzMiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDJFNzE5MzZlYUQwQTY4MTZiZmIzRUIwNmVjYTEwQWQyOGU4NTg4NGEifQ",
+      payload: "eyJkb21haW4iOiJwZXJ1bi1jYXNpbm8udmVyY2VsLmFwcCJ9",
+      signature: "GKVHAxQGgNVy+tgophs8pi37jAbzJqrsBE0/7/Xk3pEWtstm0HfrWMef9F6oJgvDu+3QySh9ug9rAqCHuDZidBw="
+    },
     frame: {
       version: "next",
       name: "Perun Casino",
@@ -14,10 +19,5 @@ export async function GET() {
     }
   };
 
-  return NextResponse.json(manifest, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
+  return NextResponse.json(manifest);
 }
