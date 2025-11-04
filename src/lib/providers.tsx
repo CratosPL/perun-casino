@@ -4,13 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
-import { farcasterConnector } from './farcaster-connector';
 
 const queryClient = new QueryClient();
 
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [farcasterConnector()],
+  connectors: [],
   ssr: false,
   transports: {
     [base.id]: http(),
