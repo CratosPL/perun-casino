@@ -54,11 +54,18 @@ export function MiniKitProvider({ children }: { children: ReactNode }) {
         
         setIsSDKLoaded(true);
         
-        // Notify app that SDK is ready
-        sdk.actions.ready();
+        // WAŻNE: Notify app that SDK is ready
+        await sdk.actions.ready();
       } catch (error) {
         console.error('MiniKit SDK load error:', error);
         setIsSDKLoaded(true);
+        
+        // Try to call ready even if error
+        try {
+          await sdk.actions.ready();
+        } catch (e) {
+          console.error('Failed to call ready:', e);
+        }
       }
     };
 
