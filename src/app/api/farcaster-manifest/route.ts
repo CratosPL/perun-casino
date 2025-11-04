@@ -13,7 +13,7 @@ export async function GET() {
       subtitle: "God of Thunder Games",
       description: "Arcade mini-games with Thunder Coins. Buy coins with USDC, play provably fair games, compete on leaderboards. Convert coins back anytime. Small stakes fun on Base.",
       primaryCategory: "games",
-      tags: ["games", "arcade", "leaderboard", "base", "crypto", "casual"],
+      tags: ["arcade", "leaderboard", "base", "crypto", "casual"],
       tagline: "Play. Compete. Convert.",
       iconUrl: "https://perun-casino.vercel.app/icon.png",
       homeUrl: "https://perun-casino.vercel.app",
