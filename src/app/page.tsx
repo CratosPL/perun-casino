@@ -14,6 +14,7 @@ export default function Home() {
             </span>
           </div>
 
+
           {/* Main heading with lightning icons */}
           <div className="space-y-6 relative">
             <div className="absolute -left-20 top-0 text-6xl opacity-20 thunder-icon">⚡</div>
@@ -31,21 +32,24 @@ export default function Home() {
             </p>
           </div>
 
+
           {/* Description */}
           <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-            Buy Thunder Coins with USDC, play provably fair casino games, 
-            and compete for monthly crypto rewards on Base blockchain.
+            Arcade-style games with micro-stakes. Buy Thunder Coins with USDC ($1 = 1000 ⚡), 
+            play provably fair mini-games, compete on leaderboards. Convert coins back anytime.
           </p>
+
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
             <button className="btn-primary text-base">
-              🎰 Play Games
+              🎮 Play Games
             </button>
             <button className="btn-secondary text-base">
-              Buy Thunders
+              ⚡ Buy Thunder Coins
             </button>
           </div>
+
 
           {/* Features Grid WITH ICONS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-24">
@@ -60,15 +64,17 @@ export default function Home() {
               </p>
             </div>
 
+
             <div className="glass-card p-8 text-center space-y-4">
               <div className="feature-icon mx-auto">
-                ⚡
+                💸
               </div>
-              <h3 className="text-xl font-semibold">Instant Rewards</h3>
+              <h3 className="text-xl font-semibold">Micro-Stakes</h3>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                Top 100 players earn USDC rewards monthly. No withdrawal delays.
+                Start with just $1. Small amounts, casual fun. Convert coins back to USDC anytime.
               </p>
             </div>
+
 
             <div className="glass-card p-8 text-center space-y-4">
               <div className="feature-icon mx-auto">
@@ -80,7 +86,9 @@ export default function Home() {
               </p>
             </div>
 
+
           </div>
+
 
           {/* How it works WITH GRAPHIC BADGES */}
           <div className="pt-32 space-y-12">
@@ -92,30 +100,35 @@ export default function Home() {
                 <div className="step-badge mx-auto">1</div>
                 <h3 className="text-xl font-semibold">Buy Thunder Coins</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  Purchase Thunder Coins with USDC. 100 Thunders = $1. Get bonus on bulk purchase.
+                  Purchase Thunder Coins with USDC. 1000 ⚡ = $1. Start with just $1 and play!
                 </p>
               </div>
+
 
               <div className="glass-card p-8 text-center space-y-4">
                 <div className="step-badge mx-auto">2</div>
                 <h3 className="text-xl font-semibold">Play Epic Games</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  CoinFlip, Dice, Slots. All provably fair. Bet your Thunders and win big.
+                  CoinFlip, Dice, Slots. All provably fair. Bet your Thunders in casual arcade games.
                 </p>
               </div>
 
+
               <div className="glass-card p-8 text-center space-y-4">
                 <div className="step-badge mx-auto">3</div>
-                <h3 className="text-xl font-semibold">Claim Rewards</h3>
+                <h3 className="text-xl font-semibold">Convert & Compete</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  Top 100 monthly players earn real USDC rewards. Compete on leaderboard.
+                  Exchange Thunder Coins back to USDC anytime. Compete on leaderboards for bragging rights!
                 </p>
               </div>
+
 
             </div>
           </div>
 
+
         </div>
+
 
       </div>
     </main>
