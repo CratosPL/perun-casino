@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhGRDBlNzZGQkQzODlEYzY3NjhENjhGQUEyN0RENkQxMTRGMTVENjY3In0",
+    "payload": "eyJkb21haW4iOiJwZXJ1bi1jYXNpbm8udmVyY2VsLmFwcCJ9",
+    "signature": "MHg1YTNhOTBiNWI5OTc3YmU3ZDhiNGM4ODU5ZGQ5NjhlMWY5NmNmZmI5MTU4ODRkZmM3ZGU1MjVhOGRhYjg5YzNmM2IyNGNmMjYwNmI4Zjk5YjQ4MzE5YjFjNDg2YTFiMzYzMGFhOTQ4YTdjOGQxZDY3NzllZGUxNDE4YzNmYzExNDFi"
+  },
+  "frame": {
+    "version": "next",
+    "name": "Perun Casino",
+    "iconUrl": "https://perun-casino.vercel.app/icon.png",
+    "homeUrl": "https://perun-casino.vercel.app",
+    "imageUrl": "https://perun-casino.vercel.app/og-image.png",
+    "splashImageUrl": "https://perun-casino.vercel.app/splash.png",
+    "splashBackgroundColor": "#0A0E27",
+    "webhookUrl": "https://perun-casino.vercel.app/api/webhook"
+  }
+}

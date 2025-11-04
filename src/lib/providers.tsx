@@ -1,0 +1,41 @@
+'use client';
+
+import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { base, baseSepolia } from 'wagmi/chains';
+import { http, WagmiProvider, createConfig } from 'wagmi';
+import { coinbaseWallet } from 'wagmi/connectors';
+import { ReactNode } from 'react';
+
+const queryClient = new QueryClient();
+
+const wagmiConfig = createConfig({
+  chains: [baseSepolia, base],
+  connectors: [
+    coinbaseWallet({
+      appName: 'PERUN Casino',
+      preference: 'smartWalletOnly',
+    }),
+  ],
+  ssr: true,
+  transports: {
+    [baseSepolia.id]: http(),
+    [base.id]: http(),
+  },
+});
+
+export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={baseSepolia}
+        >
+          {children}
+        </OnchainKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
+
