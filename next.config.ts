@@ -5,32 +5,26 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['perun-casino.vercel.app'],
   },
-  async redirects() {
+  async rewrites() {
     return [
       {
         source: '/.well-known/farcaster.json',
-        destination: '/farcaster.json',
-        permanent: true,
+        destination: '/api/farcaster-manifest',
       },
     ];
   },
   async headers() {
     return [
       {
-        source: '/farcaster.json',
+        source: '/api/farcaster-manifest',
         headers: [
           {
             key: 'Content-Type',
             value: 'application/json',
           },
-        ],
-      },
-      {
-        source: '/.well-known/farcaster.json',
-        headers: [
           {
-            key: 'Content-Type',
-            value: 'application/json',
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
           },
         ],
       },
