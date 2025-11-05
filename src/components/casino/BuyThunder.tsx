@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useWriteContract, useAccount, useReadContract } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { parseUnits } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
@@ -54,7 +54,7 @@ export function BuyThunder() {
         args: [THUNDER_CONTRACT, buyPrice],
       });
       
-      setTimeout(() => refetchAllowance(), 2000);
+      setTimeout(() => refetchAllowance(), 3000);
     } catch (error) {
       console.error('Approve error:', error);
     }
@@ -75,17 +75,24 @@ export function BuyThunder() {
     }
   };
 
+  if (!address) {
+    return (
+      <div className="glass-card p-8">
+        <p className="text-center">🚀 Open in Farcaster</p>
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card p-8 space-y-6">
       <h2 className="text-3xl font-bold thunder-gradient text-center">⚡ Buy Thunder</h2>
       
-      <div className="space-y-4" suppressHydrationWarning>
+      <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Thunder Amount
           </label>
           <input
-            suppressHydrationWarning
             type="number"
             value={thunderAmount}
             onChange={(e) => setThunderAmount(e.target.value)}
@@ -100,10 +107,7 @@ export function BuyThunder() {
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               Price: <span className="thunder-gradient font-bold">
-                ${(() => {
-                  const price = Number(buyPrice.toString());
-                  return (price / 1_000_000).toFixed(4);
-                })()} USDC
+                ${(Number(buyPrice.toString()) / 1_000_000).toFixed(4)} USDC
               </span>
             </p>
           </div>
@@ -125,12 +129,6 @@ export function BuyThunder() {
           >
             {isPending ? '⏳ Processing...' : '⚡ Buy Thunder'}
           </button>
-        )}
-
-        {!address && (
-          <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
-            Connect wallet to buy Thunder
-          </p>
         )}
       </div>
     </div>

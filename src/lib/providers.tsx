@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'; // DODANE!
 
 const queryClient = new QueryClient();
 
-// Minimalna konfiguracja wagmi BEZ connectorów (MiniKit ma własny wallet)
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [], // PUSTE - MiniKit użyje własnego wallet
+  connectors: [farcasterMiniApp()], // ZMIENIONE!
   ssr: false,
   transports: {
     [base.id]: http(),

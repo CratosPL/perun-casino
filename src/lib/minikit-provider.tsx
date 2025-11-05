@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import sdk from '@farcaster/frame-sdk';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 type MiniKitContextType = {
   isSDKLoaded: boolean;
@@ -38,29 +38,24 @@ export function MiniKitProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const load = async () => {
       try {
-        // Initialize SDK
         const ctx = await sdk.context;
         setContext(ctx);
         
-        // Get user info
         if (ctx?.user) {
           setUser({
             fid: ctx.user.fid,
             username: ctx.user.username || null,
             displayName: ctx.user.displayName || null,
-            pfpUrl: ctx.user.pfpUrl || null,
+            pfpUrl: ctx.user.pfpUrl || null, // POPRAWIONE!
           });
         }
         
         setIsSDKLoaded(true);
-        
-        // WAŻNE: Notify app that SDK is ready
         await sdk.actions.ready();
       } catch (error) {
         console.error('MiniKit SDK load error:', error);
         setIsSDKLoaded(true);
         
-        // Try to call ready even if error
         try {
           await sdk.actions.ready();
         } catch (e) {

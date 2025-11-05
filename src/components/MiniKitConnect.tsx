@@ -1,36 +1,20 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useAccount, useConnect } from 'wagmi';
 import { useMiniKit } from '@/lib/minikit-provider';
-import sdk from '@farcaster/frame-sdk';
-import { useEffect, useState } from 'react';
 
 export function MiniKitConnect() {
   const { isSDKLoaded, user } = useMiniKit();
-  const [address, setAddress] = useState<string | null>(null);
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
 
   useEffect(() => {
-    if (!isSDKLoaded) return;
-
-    const getAddress = async () => {
-      try {
-        const provider = await sdk.wallet.ethProvider;
-        
-        if (provider) {
-          const accounts = await provider.request({ 
-            method: 'eth_requestAccounts' 
-          });
-          
-          if (accounts && accounts.length > 0) {
-            setAddress(accounts[0]);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to get wallet address:', error);
-      }
-    };
-
-    getAddress();
-  }, [isSDKLoaded]);
+    // Auto-connect do Farcaster wallet
+    if (isSDKLoaded && !isConnected && connectors.length > 0) {
+      connect({ connector: connectors[0] });
+    }
+  }, [isSDKLoaded, isConnected, connectors, connect]);
 
   if (!isSDKLoaded) {
     return (
