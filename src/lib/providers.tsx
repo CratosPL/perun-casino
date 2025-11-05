@@ -4,13 +4,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'; // DODANE!
+import { injected } from 'wagmi/connectors';
 
 const queryClient = new QueryClient();
 
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [farcasterMiniApp()], // ZMIENIONE!
+  connectors: [
+    injected({ target: 'metaMask' }), // Farcaster używa injected provider
+  ],
   ssr: false,
   transports: {
     [base.id]: http(),
