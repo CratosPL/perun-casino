@@ -5,7 +5,7 @@ import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { parseUnits } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 
-const THUNDER_CONTRACT = '0xEC072aC80854A3477b447f895A9A32157589EA26';
+const THUNDER_CONTRACT = '0x5b73C5498c1E3b4dbA84de0F1833c4a029d90519';
 
 export function SellThunder() {
   const { address } = useAccount(); // ← POPRAWIONE!

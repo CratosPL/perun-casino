@@ -6,7 +6,7 @@ import { parseUnits } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
 
-const THUNDER_CONTRACT = '0xEC072aC80854A3477b447f895A9A32157589EA26';
+const THUNDER_CONTRACT = '0x5b73C5498c1E3b4dbA84de0F1833c4a029d90519';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
 export function BuyThunder() {
