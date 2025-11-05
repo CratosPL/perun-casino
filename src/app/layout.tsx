@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "../lib/providers";
-import { Navbar } from "../components/Navbar";
+import { MiniKitProvider } from "../lib/minikit-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
+        <MiniKitProvider>
+          <Providers>
+            {children}
+          </Providers>
+        </MiniKitProvider>
       </body>
     </html>
   );

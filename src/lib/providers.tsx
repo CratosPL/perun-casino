@@ -7,9 +7,10 @@ import { ReactNode } from 'react';
 
 const queryClient = new QueryClient();
 
+// Minimalna konfiguracja wagmi BEZ connectorów (MiniKit ma własny wallet)
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [],
+  connectors: [], // PUSTE - MiniKit użyje własnego wallet
   ssr: false,
   transports: {
     [base.id]: http(),
