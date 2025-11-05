@@ -11,7 +11,7 @@ const queryClient = new QueryClient();
 const wagmiConfig = createConfig({
   chains: [base],
   connectors: [
-    injected({ target: 'metaMask' }), // Farcaster używa injected provider
+    injected({ target: 'metaMask' }),
   ],
   ssr: false,
   transports: {
