@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 import { parseUnits, encodeFunctionData } from 'viem';
-import { sdk } from '@farcaster/miniapp-sdk'; // ✅ DODANE!
+import { sdk } from '@farcaster/miniapp-sdk';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
 
@@ -43,7 +43,6 @@ export function BuyThunder() {
     
     setLoading(true);
     try {
-      // Pobierz ethereum provider z SDK!
       const ethProvider = await sdk.wallet.getEthereumProvider();
       
       if (!ethProvider) {
@@ -57,7 +56,6 @@ export function BuyThunder() {
         args: [THUNDER_CONTRACT, parseUnits('1000000', 6)],
       });
 
-      // Wyślij transakcję przez SDK!
       const txHash = await ethProvider.request({
         method: 'eth_sendTransaction',
         params: [{
@@ -70,7 +68,6 @@ export function BuyThunder() {
       console.log('Approve tx:', txHash);
       alert('Approval sent!');
 
-      // Refresh allowance
       setTimeout(() => refetchAllowance(), 3000);
     } catch (error: any) {
       console.error('Approve error:', error);
@@ -141,7 +138,7 @@ export function BuyThunder() {
           step="100"
         />
 
-        {buyPrice && (
+        {buyPrice != null && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm">Price: ${(Number(buyPrice.toString()) / 1e18).toFixed(6)} USDC</p>
           </div>
