@@ -1,25 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAccount, useConnect } from 'wagmi';
+import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
 import { useMiniKit } from '@/lib/minikit-provider';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export function MiniKitConnect() {
+  const { isConnected, address } = useAccount();
   const { isSDKLoaded, user } = useMiniKit();
-  const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-
-  // Auto-connect gdy Warpcast provider jest dostępny
-  useEffect(() => {
-    if (isSDKLoaded && !isConnected && connectors.length > 0) {
-      connect({ connector: connectors[0] });
-    }
-  }, [isSDKLoaded, isConnected, connectors, connect]);
 
   if (!isSDKLoaded) {
     return (
       <div className="px-4 py-2 bg-black/40 rounded-lg border border-purple-500/30">
-        <p className="text-sm">⏳ Loading...</p>
+        <p className="text-sm">⏳ Loading SDK...</p>
       </div>
     );
   }
@@ -48,7 +41,7 @@ export function MiniKitConnect() {
         </p>
       </div>
       <div className="px-3 py-2 bg-purple-500/20 rounded-lg border border-purple-500/50">
-        <p className="text-xs font-medium">@{user.username || 'user'}</p>
+        <p className="text-xs font-medium">@{user.username || `fid:${user.fid}`}</p>
       </div>
     </div>
   );

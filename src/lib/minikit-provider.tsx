@@ -40,22 +40,22 @@ export function MiniKitProvider({ children }: { children: ReactNode }) {
       try {
         const ctx = await sdk.context;
         setContext(ctx);
-        
+
         if (ctx?.user) {
           setUser({
             fid: ctx.user.fid,
             username: ctx.user.username || null,
             displayName: ctx.user.displayName || null,
-            pfpUrl: ctx.user.pfpUrl || null, // POPRAWIONE!
+            pfpUrl: ctx.user.pfpUrl || null,
           });
         }
-        
+
         setIsSDKLoaded(true);
         await sdk.actions.ready();
       } catch (error) {
         console.error('MiniKit SDK load error:', error);
         setIsSDKLoaded(true);
-        
+
         try {
           await sdk.actions.ready();
         } catch (e) {

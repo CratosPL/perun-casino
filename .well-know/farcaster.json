@@ -13,12 +13,15 @@
     "splashBackgroundColor": "#0A0A0A",
     "subtitle": "Thunder Coin Casino",
     "description": "Buy Thunder Coins with USDC, play provably fair games, compete on leaderboards.",
+    "screenshotUrls": [],
     "primaryCategory": "games",
     "tags": ["casino", "gaming", "crypto", "thunder"],
     "heroImageUrl": "https://perun-casino.vercel.app/hero.png",
     "tagline": "God of Thunder Games",
     "ogTitle": "Perun Casino",
     "ogDescription": "Thunder Coin gambling on Base network",
-    "ogImageUrl": "https://perun-casino.vercel.app/og-image.jpg"
+    "ogImageUrl": "https://perun-casino.vercel.app/og-image.jpg",
+    "requiredChains": ["eip155:8453"],
+    "requiredCapabilities": ["wallet.getEthereumProvider"]
   }
 }
