@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
-import { parseUnits } from 'viem';
+import { parseUnits, encodeFunctionData } from 'viem';
+import { sdk } from '@farcaster/miniapp-sdk'; // ✅ DODANE!
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
 
@@ -13,9 +14,8 @@ export function BuyThunder() {
   const { address, isConnected } = useAccount();
   const [thunderAmount, setThunderAmount] = useState('1000');
   const [step, setStep] = useState<'approve' | 'buy'>('approve');
+  const [loading, setLoading] = useState(false);
   
-  const { writeContract, isPending, isSuccess, error } = useWriteContract();
-
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: USDC_ADDRESS as `0x${string}`,
     abi: USDCABI,
@@ -30,84 +30,98 @@ export function BuyThunder() {
     args: thunderAmount ? [parseUnits(thunderAmount, 18)] : undefined,
   });
 
-  // Auto-refresh allowance po successful transakcji
-  useEffect(() => {
-    if (isSuccess) {
-      console.log('Transaction successful, refreshing allowance...');
-      setTimeout(() => {
-        refetchAllowance();
-      }, 3000);
-    }
-  }, [isSuccess, refetchAllowance]);
-
-  // Ustaw step na podstawie allowance
   useEffect(() => {
     if (allowance && buyPrice) {
       const allowanceBig = BigInt(String(allowance));
       const priceBig = BigInt(String(buyPrice));
-      
-      console.log('Allowance check:', {
-        allowance: allowance.toString(),
-        price: buyPrice.toString(),
-        needsApprove: allowanceBig < priceBig,
-      });
-      
       setStep(allowanceBig >= priceBig ? 'buy' : 'approve');
     }
   }, [allowance, buyPrice]);
 
-  // Show errors
-  useEffect(() => {
-    if (error) {
-      console.error('WriteContract error:', error);
-      alert(`Error: ${error.message}`);
-    }
-  }, [error]);
-
   const handleApprove = async () => {
-    if (!address || !buyPrice) {
-      console.error('Missing address or buyPrice:', { address, buyPrice });
-      return;
-    }
+    if (!address || !buyPrice) return;
     
-    console.log('Starting approve transaction...', { address, buyPrice: buyPrice.toString() });
-    
+    setLoading(true);
     try {
-      await writeContract({
-        address: USDC_ADDRESS as `0x${string}`,
+      // Pobierz ethereum provider z SDK!
+      const ethProvider = await sdk.wallet.getEthereumProvider();
+      
+      if (!ethProvider) {
+        alert('Ethereum provider not available');
+        return;
+      }
+
+      const data = encodeFunctionData({
         abi: USDCABI,
         functionName: 'approve',
-        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)], // Approve 1M USDC
+        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)],
       });
-    } catch (error) {
+
+      // Wyślij transakcję przez SDK!
+      const txHash = await ethProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: address,
+          to: USDC_ADDRESS,
+          data,
+        }],
+      });
+
+      console.log('Approve tx:', txHash);
+      alert('Approval sent!');
+
+      // Refresh allowance
+      setTimeout(() => refetchAllowance(), 3000);
+    } catch (error: any) {
       console.error('Approve error:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleBuy = async () => {
-    if (!address || !thunderAmount) {
-      console.error('Missing address or thunderAmount:', { address, thunderAmount });
-      return;
-    }
+    if (!address || !thunderAmount) return;
     
-    console.log('Starting buy transaction...', { address, thunderAmount });
-    
+    setLoading(true);
     try {
-      await writeContract({
-        address: THUNDER_CONTRACT as `0x${string}`,
+      const ethProvider = await sdk.wallet.getEthereumProvider();
+      
+      if (!ethProvider) {
+        alert('Ethereum provider not available');
+        return;
+      }
+
+      const data = encodeFunctionData({
         abi: ThunderABI,
         functionName: 'buy',
         args: [parseUnits(thunderAmount, 18)],
       });
-    } catch (error) {
+
+      const txHash = await ethProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: address,
+          to: THUNDER_CONTRACT,
+          data,
+        }],
+      });
+
+      console.log('Buy tx:', txHash);
+      alert('Purchase successful!');
+      setThunderAmount('1000');
+    } catch (error: any) {
       console.error('Buy error:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!isConnected || !address) {
     return (
       <div className="glass-card p-8">
-        <p className="text-center">🚀 Open in Farcaster to buy Thunder</p>
+        <p className="text-center">🚀 Open in Farcaster</p>
       </div>
     );
   }
@@ -117,66 +131,41 @@ export function BuyThunder() {
       <h2 className="text-3xl font-bold thunder-gradient text-center">⚡ Buy Thunder</h2>
       
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Thunder Amount
-          </label>
-          <input
-            type="number"
-            value={thunderAmount}
-            onChange={(e) => setThunderAmount(e.target.value)}
-            placeholder="1000"
-            className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg focus:border-purple-500 focus:outline-none"
-            min="1"
-            step="100"
-          />
-        </div>
+        <input
+          type="number"
+          value={thunderAmount}
+          onChange={(e) => setThunderAmount(e.target.value)}
+          placeholder="1000"
+          className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg"
+          min="1"
+          step="100"
+        />
 
-        {buyPrice != null && (
+        {buyPrice && (
           <div className="p-3 bg-black/40 rounded-lg">
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Price: <span className="thunder-gradient font-bold">
-                ${(Number(buyPrice.toString()) / 1_000_000_000_000_000_000).toFixed(6)} USDC
-              </span>
-            </p>
-          </div>
-        )}
-
-        {allowance != null && BigInt(String(allowance)) > BigInt(0) && (
-          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
-            <p className="text-xs text-green-400">
-              ✅ USDC Approved: ${(Number(allowance.toString()) / 1_000_000).toFixed(2)}
-            </p>
+            <p className="text-sm">Price: ${(Number(buyPrice.toString()) / 1e18).toFixed(6)} USDC</p>
           </div>
         )}
 
         {step === 'approve' ? (
           <button
             onClick={handleApprove}
-            disabled={isPending || !address || !buyPrice}
-            className="btn-secondary w-full text-base"
+            disabled={loading}
+            className="btn-secondary w-full"
           >
-            {isPending ? '⏳ Approving...' : '✅ Approve USDC'}
+            {loading ? '⏳ Approving...' : '✅ Approve USDC'}
           </button>
         ) : (
           <button
             onClick={handleBuy}
-            disabled={isPending || !address || !thunderAmount}
-            className="btn-primary w-full text-base"
+            disabled={loading}
+            className="btn-primary w-full"
           >
-            {isPending ? '⏳ Processing...' : '⚡ Buy Thunder'}
+            {loading ? '⏳ Buying...' : '⚡ Buy Thunder'}
           </button>
         )}
 
-        {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <p className="text-sm text-red-400">❌ {error.message}</p>
-          </div>
-        )}
-
-        <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
-          Connected: {address.slice(0, 6)}...{address.slice(-4)}
-        </p>
+        <p className="text-xs text-center">Connected: {address.slice(0, 6)}...{address.slice(-4)}</p>
       </div>
     </div>
   );

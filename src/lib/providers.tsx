@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'; // ✅ DODANE
 
 const queryClient = new QueryClient();
 
+// BEZ ŻADNYCH CONNECTORÓW! Farcaster sam zarządza
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [farcasterMiniApp()], // ✅ ZMIENIONE z pustej listy!
+  connectors: [], // PUSTE - Farcaster injectuje provider
   ssr: false,
   transports: {
     [base.id]: http(),
