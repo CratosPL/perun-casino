@@ -29,7 +29,7 @@ export function SellThunder() {
 
   useEffect(() => {
     if (error) {
-      alert(`Transaction failed: ${error.message}`);
+      console.error('Sell transaction error:', error);
     }
   }, [error]);
 
@@ -48,7 +48,7 @@ export function SellThunder() {
     }
   };
 
-  // Calculate if user has enough balance
+  // Sprawdzenie czy użytkownik ma wystarczającą ilość Thunder
   const hasEnoughBalance = () => {
     if (!thunderBalance || !thunderAmount) return false;
     try {
@@ -87,14 +87,16 @@ export function SellThunder() {
           />
         </div>
 
+        {/* Error gdy nie da się pobrać ceny */}
         {priceError && (
           <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
             <p className="text-sm text-red-400">
-              ⚠️ Cannot get sell price - contract may have insufficient supply
+              ⚠️ Cannot sell - contract may have insufficient supply
             </p>
           </div>
         )}
 
+        {/* Cena sprzedaży */}
         {sellPrice != null && !priceError && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -103,11 +105,12 @@ export function SellThunder() {
               </span>
             </p>
             <p className="text-xs mt-1 text-yellow-400">
-              ⚠️ Contract pricing bug - will redeploy soon
+              ⚠️ Contract has pricing bug - fix coming soon
             </p>
           </div>
         )}
 
+        {/* Balance użytkownika */}
         {thunderBalance != null && (
           <div className="p-3 bg-black/40 rounded-lg">
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -118,14 +121,16 @@ export function SellThunder() {
           </div>
         )}
 
+        {/* Warning - niewystarczający balance */}
         {!hasEnoughBalance() && thunderAmount && (
           <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
             <p className="text-xs text-yellow-400">
-              ⚠️ Insufficient Thunder balance
+              ⚠️ Insufficient Thunder balance to sell
             </p>
           </div>
         )}
 
+        {/* Sell button */}
         <button
           onClick={handleSell}
           disabled={isPending || !thunderAmount || !hasEnoughBalance() || !!priceError}
@@ -134,6 +139,7 @@ export function SellThunder() {
           {isPending ? '⏳ Processing...' : '💸 Sell Thunder'}
         </button>
 
+        {/* Connected wallet info */}
         <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
           Connected: {address.slice(0, 6)}...{address.slice(-4)}
         </p>

@@ -14,7 +14,7 @@ export function BuyThunder() {
   const [thunderAmount, setThunderAmount] = useState('1000');
   const [step, setStep] = useState<'approve' | 'buy'>('approve');
   
-  const { writeContract, isPending, isSuccess, error } = useWriteContract();
+  const { writeContract, isPending } = useWriteContract();
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: USDC_ADDRESS as `0x${string}`,
@@ -30,16 +30,6 @@ export function BuyThunder() {
     args: thunderAmount ? [parseUnits(thunderAmount, 18)] : undefined,
   });
 
-  // Auto-refresh allowance when transaction succeeds
-  useEffect(() => {
-    if (isSuccess) {
-      setTimeout(() => {
-        refetchAllowance();
-      }, 3000);
-    }
-  }, [isSuccess, refetchAllowance]);
-
-  // Check step based on allowance
   useEffect(() => {
     if (allowance && buyPrice) {
       const allowanceBig = BigInt(String(allowance));
@@ -49,24 +39,18 @@ export function BuyThunder() {
     }
   }, [allowance, buyPrice]);
 
-  // Show error alerts
-  useEffect(() => {
-    if (error) {
-      alert(`Transaction failed: ${error.message}`);
-    }
-  }, [error]);
-
   const handleApprove = async () => {
     if (!address || !buyPrice) return;
     
     try {
-      // Approve 1M USDC (reusable allowance)
       await writeContract({
         address: USDC_ADDRESS as `0x${string}`,
         abi: USDCABI,
         functionName: 'approve',
-        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)], // 1M USDC
+        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)],
       });
+      
+      setTimeout(() => refetchAllowance(), 3000);
     } catch (error) {
       console.error('Approve error:', error);
     }
@@ -90,7 +74,7 @@ export function BuyThunder() {
   if (!isConnected || !address) {
     return (
       <div className="glass-card p-8">
-        <p className="text-center">🚀 Open in Farcaster to buy Thunder</p>
+        <p className="text-center">🚀 Open in Farcaster</p>
       </div>
     );
   }
@@ -122,17 +106,6 @@ export function BuyThunder() {
                 ${(Number(buyPrice.toString()) / 1_000_000_000_000_000_000).toFixed(6)} USDC
               </span>
             </p>
-            <p className="text-xs mt-1 text-yellow-400">
-              ⚠️ Contract pricing bug - will redeploy soon
-            </p>
-          </div>
-        )}
-
-        {allowance != null && BigInt(String(allowance)) > BigInt(0) && (
-          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
-            <p className="text-xs text-green-400">
-              ✅ USDC Approved: ${(Number(allowance.toString()) / 1_000_000).toFixed(2)}
-            </p>
           </div>
         )}
 
@@ -153,10 +126,6 @@ export function BuyThunder() {
             {isPending ? '⏳ Processing...' : '⚡ Buy Thunder'}
           </button>
         )}
-
-        <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
-          Connected: {address.slice(0, 6)}...{address.slice(-4)}
-        </p>
       </div>
     </div>
   );

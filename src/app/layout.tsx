@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   title: "⚡ PERUN Casino | God of Thunder Games",
   description: "Enter the realm of Perun, Slavic God of Thunder. Buy Thunder Coins, play epic provably fair games, and claim divine rewards on Base blockchain.",
   openGraph: {
-    title: "Perun Casino",
-    description: "Thunder Coin gambling on Base network",
+    title: "⚡ PERUN Casino",
+    description: "God of Thunder Games - Buy Thunder Coins & Play",
     images: [
       {
         url: "https://perun-casino.vercel.app/og-image.jpg",
@@ -19,10 +19,6 @@ export const metadata: Metadata = {
         height: 630,
       },
     ],
-  },
-  other: {
-    "fc:frame": "vNext",
-    "fc:miniapp:domain": "perun-casino.vercel.app",
   },
 };
 
@@ -33,10 +29,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:miniapp:domain" content="perun-casino.vercel.app" />
-      </head>
       <body className={inter.className}>
         <MiniKitProvider>
           <Providers>

@@ -4,15 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
-import { injected } from 'wagmi/connectors';
 
 const queryClient = new QueryClient();
 
+// Warpcast automatycznie injectuje provider (window.ethereum)
+// Nie potrzebujemy connectora - wagmi sam go znajdzie!
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [
-    injected({ target: 'metaMask' }),
-  ],
+  connectors: [], // PUSTE - Warpcast zrobi resztę
   ssr: false,
   transports: {
     [base.id]: http(),
