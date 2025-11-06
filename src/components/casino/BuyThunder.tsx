@@ -14,7 +14,7 @@ export function BuyThunder() {
   const [thunderAmount, setThunderAmount] = useState('1000');
   const [step, setStep] = useState<'approve' | 'buy'>('approve');
   
-  const { writeContract, isPending } = useWriteContract();
+  const { writeContract, isPending, isSuccess, error } = useWriteContract();
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: USDC_ADDRESS as `0x${string}`,
@@ -30,34 +30,67 @@ export function BuyThunder() {
     args: thunderAmount ? [parseUnits(thunderAmount, 18)] : undefined,
   });
 
+  // Auto-refresh allowance po successful transakcji
+  useEffect(() => {
+    if (isSuccess) {
+      console.log('Transaction successful, refreshing allowance...');
+      setTimeout(() => {
+        refetchAllowance();
+      }, 3000);
+    }
+  }, [isSuccess, refetchAllowance]);
+
+  // Ustaw step na podstawie allowance
   useEffect(() => {
     if (allowance && buyPrice) {
       const allowanceBig = BigInt(String(allowance));
       const priceBig = BigInt(String(buyPrice));
       
+      console.log('Allowance check:', {
+        allowance: allowance.toString(),
+        price: buyPrice.toString(),
+        needsApprove: allowanceBig < priceBig,
+      });
+      
       setStep(allowanceBig >= priceBig ? 'buy' : 'approve');
     }
   }, [allowance, buyPrice]);
 
+  // Show errors
+  useEffect(() => {
+    if (error) {
+      console.error('WriteContract error:', error);
+      alert(`Error: ${error.message}`);
+    }
+  }, [error]);
+
   const handleApprove = async () => {
-    if (!address || !buyPrice) return;
+    if (!address || !buyPrice) {
+      console.error('Missing address or buyPrice:', { address, buyPrice });
+      return;
+    }
+    
+    console.log('Starting approve transaction...', { address, buyPrice: buyPrice.toString() });
     
     try {
       await writeContract({
         address: USDC_ADDRESS as `0x${string}`,
         abi: USDCABI,
         functionName: 'approve',
-        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)],
+        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)], // Approve 1M USDC
       });
-      
-      setTimeout(() => refetchAllowance(), 3000);
     } catch (error) {
       console.error('Approve error:', error);
     }
   };
 
   const handleBuy = async () => {
-    if (!address || !thunderAmount) return;
+    if (!address || !thunderAmount) {
+      console.error('Missing address or thunderAmount:', { address, thunderAmount });
+      return;
+    }
+    
+    console.log('Starting buy transaction...', { address, thunderAmount });
     
     try {
       await writeContract({
@@ -74,7 +107,7 @@ export function BuyThunder() {
   if (!isConnected || !address) {
     return (
       <div className="glass-card p-8">
-        <p className="text-center">🚀 Open in Farcaster</p>
+        <p className="text-center">🚀 Open in Farcaster to buy Thunder</p>
       </div>
     );
   }
@@ -109,10 +142,18 @@ export function BuyThunder() {
           </div>
         )}
 
+        {allowance != null && BigInt(String(allowance)) > BigInt(0) && (
+          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+            <p className="text-xs text-green-400">
+              ✅ USDC Approved: ${(Number(allowance.toString()) / 1_000_000).toFixed(2)}
+            </p>
+          </div>
+        )}
+
         {step === 'approve' ? (
           <button
             onClick={handleApprove}
-            disabled={!address || isPending || !buyPrice}
+            disabled={isPending || !address || !buyPrice}
             className="btn-secondary w-full text-base"
           >
             {isPending ? '⏳ Approving...' : '✅ Approve USDC'}
@@ -120,12 +161,22 @@ export function BuyThunder() {
         ) : (
           <button
             onClick={handleBuy}
-            disabled={!address || isPending || !thunderAmount}
+            disabled={isPending || !address || !thunderAmount}
             className="btn-primary w-full text-base"
           >
             {isPending ? '⏳ Processing...' : '⚡ Buy Thunder'}
           </button>
         )}
+
+        {error && (
+          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+            <p className="text-sm text-red-400">❌ {error.message}</p>
+          </div>
+        )}
+
+        <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
+          Connected: {address.slice(0, 6)}...{address.slice(-4)}
+        </p>
       </div>
     </div>
   );

@@ -4,14 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { base } from 'wagmi/chains';
 import { http, WagmiProvider, createConfig } from 'wagmi';
 import { ReactNode } from 'react';
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'; // ✅ DODANE
 
 const queryClient = new QueryClient();
 
-// Warpcast automatycznie injectuje provider (window.ethereum)
-// Nie potrzebujemy connectora - wagmi sam go znajdzie!
 const wagmiConfig = createConfig({
   chains: [base],
-  connectors: [], // PUSTE - Warpcast zrobi resztę
+  connectors: [farcasterMiniApp()], // ✅ ZMIENIONE z pustej listy!
   ssr: false,
   transports: {
     [base.id]: http(),
