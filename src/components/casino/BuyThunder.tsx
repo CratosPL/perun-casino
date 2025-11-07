@@ -43,17 +43,17 @@ export function BuyThunder() {
   
   if (!isConnected) return <div className="glass-card p-8"><p className="text-center text-sm">🚀 Open in Farcaster</p></div>;
 
-  const displayPrice = (buyPrice && typeof buyPrice === 'bigint') ? formatThunderPrice(buyPrice) : '$0';
+  const displayPrice = buyPrice ? formatThunderPrice(buyPrice as bigint) : '$0';
 
   return (
     <div className="glass-card p-8 space-y-6">
       <h2 className="text-3xl font-bold thunder-gradient text-center">⚡ Buy Thunder</h2>
       <input type="number" value={thunderAmount} onChange={(e) => setThunderAmount(e.target.value)} className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg text-white" min="1" step="100" />
-      {buyPrice && (
+      {buyPrice ? (
         <div className="p-3 bg-black/40 rounded-lg">
           <p className="text-sm">Price: {displayPrice} USDC for {thunderAmount} Thunder</p>
         </div>
-      )}
+      ) : null}
       <button onClick={handleApproveAndBuy} disabled={isSending || !buyPrice} className="btn-primary w-full disabled:opacity-50">
         {isSending ? '⏳ Processing...' : '⚡ Approve & Buy Thunder'}
       </button>
