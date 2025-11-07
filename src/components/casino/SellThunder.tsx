@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useWriteContract, useReadContract, useSendCalls } from 'wagmi';
+import { useAccount, useReadContract, useSendCalls } from 'wagmi';
 import { parseUnits, encodeFunctionData } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
-
-const THUNDER_CONTRACT = '0xea0438580AaaA57BD27811428169566060073B6e' as const;
+import { CONTRACTS } from '@/lib/contracts';
 
 export function SellThunder() {
   const { address, isConnected } = useAccount();
@@ -13,9 +12,8 @@ export function SellThunder() {
   
   const { sendCalls, isPending: isSending } = useSendCalls();
 
-  // Pobierz ile USDC otrzymasz
   const { data: sellPrice } = useReadContract({
-    address: THUNDER_CONTRACT,
+    address: CONTRACTS.THUNDER_BONDING_CURVE,
     abi: ThunderABI,
     functionName: 'getSellPrice',
     args: thunderAmount ? [parseUnits(thunderAmount, 18)] : undefined,
@@ -33,7 +31,7 @@ export function SellThunder() {
 
       const calls = [
         {
-          to: THUNDER_CONTRACT as `0x${string}`,
+          to: CONTRACTS.THUNDER_BONDING_CURVE,
           data: sellData,
         },
       ];
@@ -56,6 +54,11 @@ export function SellThunder() {
   }
 
   const isPending = isSending;
+  
+  // FIX: Proper decimal conversion
+  const displayPrice = sellPrice 
+    ? (Number(sellPrice) / 1e6).toFixed(6) 
+    : '0';
 
   return (
     <div className="glass-card p-8 space-y-6">
@@ -71,8 +74,8 @@ export function SellThunder() {
         />
         {sellPrice !== undefined && (
           <div className="p-3 bg-black/40 rounded-lg">
-            <p className="text-sm">You receive: ${(Number(sellPrice) / 1e6).toFixed(6)} USDC</p>
-            <p className="text-xs opacity-70">Fee: 2%</p>
+            <p className="text-sm">You receive: ${displayPrice} USDC</p>
+            <p className="text-xs opacity-70">For {thunderAmount} Thunder (after 2% fee)</p>
           </div>
         )}
         <button 

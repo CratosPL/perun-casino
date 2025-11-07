@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useWriteContract, useReadContract, useSendCalls } from 'wagmi';
+import { useAccount, useReadContract, useSendCalls } from 'wagmi';
 import { parseUnits, encodeFunctionData } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
-
-const THUNDER_CONTRACT = '0xea0438580AaaA57BD27811428169566060073B6e' as const;
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
+import { CONTRACTS } from '@/lib/contracts';
 
 export function BuyThunder() {
   const { address, isConnected } = useAccount();
@@ -15,9 +13,8 @@ export function BuyThunder() {
   
   const { sendCalls, isPending: isSending } = useSendCalls();
 
-  // Pobierz cenę za Thunder
   const { data: buyPrice } = useReadContract({
-    address: THUNDER_CONTRACT,
+    address: CONTRACTS.THUNDER_BONDING_CURVE,
     abi: ThunderABI,
     functionName: 'getBuyPrice',
     args: thunderAmount ? [parseUnits(thunderAmount, 18)] : undefined,
@@ -27,11 +24,10 @@ export function BuyThunder() {
     if (!address || !thunderAmount || buyPrice === undefined) return;
 
     try {
-      // Enkoduj obydwie operacje
       const approveData = encodeFunctionData({
         abi: USDCABI,
         functionName: 'approve',
-        args: [THUNDER_CONTRACT, parseUnits('1000000', 6)],
+        args: [CONTRACTS.THUNDER_BONDING_CURVE, parseUnits('1000000', 6)],
       });
 
       const buyData = encodeFunctionData({
@@ -40,19 +36,17 @@ export function BuyThunder() {
         args: [parseUnits(thunderAmount, 18)],
       });
 
-      // Przygotuj batch transaction
       const calls = [
         {
-          to: USDC_ADDRESS as `0x${string}`,
+          to: CONTRACTS.USDC,
           data: approveData,
         },
         {
-          to: THUNDER_CONTRACT as `0x${string}`,
+          to: CONTRACTS.THUNDER_BONDING_CURVE,
           data: buyData,
         },
       ];
 
-      // Wyślij batch transaction
       await sendCalls({ 
         calls,
         account: address,
@@ -71,6 +65,13 @@ export function BuyThunder() {
   }
 
   const isPending = isSending;
+  
+  // FIX: Proper decimal conversion
+  // buyPrice is in wei (6 decimals for USDC)
+  // Display as: price / 1e6
+  const displayPrice = buyPrice 
+    ? (Number(buyPrice) / 1e6).toFixed(6) 
+    : '0';
 
   return (
     <div className="glass-card p-8 space-y-6">
@@ -86,7 +87,8 @@ export function BuyThunder() {
         />
         {buyPrice !== undefined && (
           <div className="p-3 bg-black/40 rounded-lg">
-            <p className="text-sm">Price: ${(Number(buyPrice) / 1e6).toFixed(6)} USDC</p>
+            <p className="text-sm">Price: ${displayPrice} USDC</p>
+            <p className="text-xs opacity-70">For {thunderAmount} Thunder</p>
           </div>
         )}
         <button 
