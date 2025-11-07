@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { useAccount, useReadContract, useSendCalls } from 'wagmi';
-import { parseUnits, encodeFunctionData, formatUnits } from 'viem';
+import { parseUnits, encodeFunctionData } from 'viem';
 import ThunderABI from '@/lib/abis/ThunderBondingCurve.json';
 import USDCABI from '@/lib/abis/USDC.json';
 import { CONTRACTS } from '@/lib/contracts';
-import { formatThunderPrice } from '@/lib/priceUtils'; // ✅ IMPORT
+import { formatThunderPrice } from '@/lib/priceUtils';
 
 export function BuyThunder() {
   const { address, isConnected } = useAccount();
@@ -20,7 +20,7 @@ export function BuyThunder() {
   });
 
   const handleApproveAndBuy = async () => {
-    if (!address || !thunderAmount || buyPrice === undefined) return;
+    if (!address || !thunderAmount || !buyPrice) return;
     try {
       const approveData = encodeFunctionData({
         abi: USDCABI,
@@ -43,13 +43,13 @@ export function BuyThunder() {
   
   if (!isConnected) return <div className="glass-card p-8"><p className="text-center text-sm">🚀 Open in Farcaster</p></div>;
 
-  const displayPrice = buyPrice ? formatThunderPrice(buyPrice) : '0'; // ✅ UŻYJ FUNKCJI
+  const displayPrice = (buyPrice && typeof buyPrice === 'bigint') ? formatThunderPrice(buyPrice) : '$0';
 
   return (
     <div className="glass-card p-8 space-y-6">
       <h2 className="text-3xl font-bold thunder-gradient text-center">⚡ Buy Thunder</h2>
       <input type="number" value={thunderAmount} onChange={(e) => setThunderAmount(e.target.value)} className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg text-white" min="1" step="100" />
-      {buyPrice !== undefined && (
+      {buyPrice && (
         <div className="p-3 bg-black/40 rounded-lg">
           <p className="text-sm">Price: {displayPrice} USDC for {thunderAmount} Thunder</p>
         </div>
