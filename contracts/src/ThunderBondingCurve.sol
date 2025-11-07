@@ -9,13 +9,11 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract ThunderBondingCurve is ERC20, Ownable, ReentrancyGuard {
     IERC20 public immutable usdc;
     
-    // ✅ NAPRAWIONE: Prawidłowe decimale dla USDC (6 decimali na Base)
-    uint256 public constant INITIAL_PRICE = 1e3; // 0.001 USDC
-    uint256 public constant SLOPE = 1e0;
+    uint256 public constant INITIAL_PRICE = 1e6; // 0.001 USDC per Thunder
+    uint256 public constant SLOPE = 1e3; // ✅ Poprawny slope
     uint256 public constant BUY_FEE_PERCENT = 100; // 1%
     uint256 public constant SELL_FEE_PERCENT = 200; // 2%
     uint256 public constant FEE_DENOMINATOR = 10000;
-    uint256 public constant USDC_DECIMALS = 1e6; // 6 decimali
     
     uint256 public reserveBalance;
     uint256 public collectedFees;
@@ -29,56 +27,40 @@ contract ThunderBondingCurve is ERC20, Ownable, ReentrancyGuard {
         usdc = IERC20(_usdc);
     }
     
-    // ===== PRICE CALCULATION =====
-    
     function getBuyPrice(uint256 thunderAmount) public view returns (uint256 usdcCost) {
         if (thunderAmount == 0) return 0;
         
         uint256 currentSupply = totalSupply() / 1e18;
         uint256 newSupply = currentSupply + (thunderAmount / 1e18);
-        
         uint256 avgPrice = INITIAL_PRICE + (SLOPE * (currentSupply + newSupply)) / 2;
-        uint256 baseCost = (avgPrice * thunderAmount) / (1e18 * USDC_DECIMALS);
+        uint256 baseCost = (avgPrice * thunderAmount) / 1e18;
         uint256 fee = (baseCost * BUY_FEE_PERCENT) / FEE_DENOMINATOR;
-        
-        return baseCost + fee;
+        usdcCost = baseCost + fee;
+        return usdcCost;
     }
     
     function getSellPrice(uint256 thunderAmount) public view returns (uint256 usdcReceived) {
         if (thunderAmount == 0) return 0;
         
         uint256 currentSupply = totalSupply() / 1e18;
-        require(thunderAmount / 1e18 <= currentSupply, "Exceeds supply");
+        require(thunderAmount / 1e18 <= currentSupply, "Exceeds total supply");
         
         uint256 newSupply = currentSupply - (thunderAmount / 1e18);
         uint256 avgPrice = INITIAL_PRICE + (SLOPE * (currentSupply + newSupply)) / 2;
-        uint256 baseReturn = (avgPrice * thunderAmount) / (1e18 * USDC_DECIMALS);
-        
+        uint256 baseReturn = (avgPrice * thunderAmount) / 1e18;
         uint256 fee = (baseReturn * SELL_FEE_PERCENT) / FEE_DENOMINATOR;
-        uint256 received = baseReturn - fee;
+        usdcReceived = baseReturn - fee;
         
-        require(received <= reserveBalance, "Insufficient reserve");
-        return received;
+        require(usdcReceived <= reserveBalance, "Insufficient reserve");
+        return usdcReceived;
     }
-    
-    function getCurrentPrice() external view returns (uint256) {
-        return getBuyPrice(1e18);
-    }
-    
-    function getStats() external view returns (uint256, uint256, uint256, uint256) {
-        return (totalSupply(), reserveBalance, collectedFees, getBuyPrice(1e18));
-    }
-    
-    // ===== BUY / SELL =====
     
     function buy(uint256 thunderAmount) external nonReentrant {
-        require(thunderAmount > 0, "Amount > 0");
-        require(thunderAmount >= 1e18, "Min 1 Thunder");
+        require(thunderAmount > 0, "Amount must be > 0");
+        require(thunderAmount >= 1e18, "Minimum 1 Thunder");
         
         uint256 usdcCost = getBuyPrice(thunderAmount);
         require(usdcCost > 0, "Invalid price");
-        
-        // ✅ WYMAGANE: USDC musi być wcześniej approved!
         require(usdc.transferFrom(msg.sender, address(this), usdcCost), "USDC transfer failed");
         
         uint256 baseCost = (usdcCost * FEE_DENOMINATOR) / (FEE_DENOMINATOR + BUY_FEE_PERCENT);
@@ -88,16 +70,16 @@ contract ThunderBondingCurve is ERC20, Ownable, ReentrancyGuard {
         collectedFees += fee;
         
         _mint(msg.sender, thunderAmount);
-        
         emit ThunderBought(msg.sender, usdcCost, thunderAmount, fee);
     }
     
     function sell(uint256 thunderAmount) external nonReentrant {
-        require(thunderAmount > 0, "Amount > 0");
-        require(balanceOf(msg.sender) >= thunderAmount, "Insufficient Thunder");
+        require(thunderAmount > 0, "Amount must be > 0");
+        require(balanceOf(msg.sender) >= thunderAmount, "Insufficient balance");
         
         uint256 usdcReturn = getSellPrice(thunderAmount);
-        require(usdcReturn > 0, "Invalid return");
+        require(usdcReturn > 0, "Invalid return amount");
+        require(usdcReturn <= reserveBalance, "Insufficient reserve");
         
         uint256 baseReturn = (usdcReturn * FEE_DENOMINATOR) / (FEE_DENOMINATOR - SELL_FEE_PERCENT);
         uint256 fee = baseReturn - usdcReturn;
@@ -107,17 +89,22 @@ contract ThunderBondingCurve is ERC20, Ownable, ReentrancyGuard {
         collectedFees += fee;
         
         require(usdc.transfer(msg.sender, usdcReturn), "USDC transfer failed");
-        
         emit ThunderSold(msg.sender, thunderAmount, usdcReturn, fee);
     }
     
-    // ===== ADMIN =====
-    
     function withdrawFees() external onlyOwner nonReentrant {
         uint256 amount = collectedFees;
-        require(amount > 0, "No fees");
+        require(amount > 0, "No fees to withdraw");
         collectedFees = 0;
-        require(usdc.transfer(owner(), amount), "Withdrawal failed");
+        require(usdc.transfer(owner(), amount), "Fee withdrawal failed");
         emit FeesWithdrawn(owner(), amount);
+    }
+    
+    function getCurrentPrice() external view returns (uint256) {
+        return getBuyPrice(1e18);
+    }
+    
+    function getStats() external view returns (uint256, uint256, uint256, uint256) {
+        return (totalSupply(), reserveBalance, collectedFees, getBuyPrice(1e18));
     }
 }
