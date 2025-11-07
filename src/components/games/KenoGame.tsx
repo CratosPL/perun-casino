@@ -104,7 +104,7 @@ export function KenoGame() {
     return <div className="glass-card p-8"><p className="text-center text-sm">🚀 Open in Farcaster to connect</p></div>;
   }
   
-  const hasDeposit = blockchainBalance ? (blockchainBalance as bigint) > 0n : false;
+  const hasDeposit = !!blockchainBalance;
   
   if (!gameActive && !hasDeposit) {
     return (
