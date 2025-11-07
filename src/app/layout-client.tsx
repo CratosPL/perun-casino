@@ -11,12 +11,9 @@ export function RootLayoutClient({
   children: React.ReactNode;
 }) {
   useEffect(() => {
+    // Ta funkcja MUSI być wywołana, aby Farcaster wiedział, że apka się załadowała
     const initApp = async () => {
       try {
-        // Daj React chwilę na załadowanie
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Powiedz Farcaster że aplikacja jest gotowa
         await sdk.actions.ready();
         console.log('✅ Perun Casino ready!');
       } catch (error) {

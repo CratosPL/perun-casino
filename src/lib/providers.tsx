@@ -8,12 +8,13 @@ import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector';
 
 const queryClient = new QueryClient();
 
+// Używamy createConfig z oficjalnym connectorem
 const wagmiConfig = createConfig({
   chains: [base],
   connectors: [
-    farcasterMiniApp(), // ✅ OFICJALNY CONNECTOR!
+    farcasterMiniApp(), // ✅ To jest oficjalny i jedyny connector, którego potrzebujesz
   ],
-  ssr: false,
+  ssr: false, // Mini App jest zawsze po stronie klienta
   transports: {
     [base.id]: http(),
   },

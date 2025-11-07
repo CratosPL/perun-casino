@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "../lib/providers";
-import { MiniKitProvider } from "../lib/minikit-provider";
+import { RootLayoutClient } from "./layout-client"; // Importujemy komponent kliencki
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,12 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <MiniKitProvider>
-          <Providers>
-            {children}
-          </Providers>
-        </MiniKitProvider>
+        {/* Renderujemy komponent kliencki, który zawiera resztę logiki */}
+        <RootLayoutClient>
+          {children}
+        </RootLayoutClient>
       </body>
     </html>
   );
 }
+
+

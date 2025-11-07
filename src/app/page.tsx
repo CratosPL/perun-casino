@@ -3,6 +3,7 @@
 import { Navbar } from '@/components/Navbar';
 import { BuyThunder } from '@/components/casino/BuyThunder';
 import { SellThunder } from '@/components/casino/SellThunder';
+import { KenoGame } from '@/components/games/KenoGame';
 
 export default function Home() {
   return (
@@ -51,13 +52,11 @@ export default function Home() {
               <SellThunder />
             </div>
 
-            {/* Features Grid WITH ICONS */}
+            {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-24">
               
               <div className="glass-card p-8 text-center space-y-4">
-                <div className="feature-icon mx-auto">
-                  🎲
-                </div>
+                <div className="feature-icon mx-auto">🎲</div>
                 <h3 className="text-xl font-semibold">Provably Fair</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   Every game result is cryptographically verifiable. No house manipulation.
@@ -65,9 +64,7 @@ export default function Home() {
               </div>
 
               <div className="glass-card p-8 text-center space-y-4">
-                <div className="feature-icon mx-auto">
-                  💸
-                </div>
+                <div className="feature-icon mx-auto">💸</div>
                 <h3 className="text-xl font-semibold">Micro-Stakes</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   Start with just $1. Small amounts, casual fun. Convert coins back to USDC anytime.
@@ -75,18 +72,23 @@ export default function Home() {
               </div>
 
               <div className="glass-card p-8 text-center space-y-4">
-                <div className="feature-icon mx-auto">
-                  🔒
-                </div>
+                <div className="feature-icon mx-auto">🔒</div>
                 <h3 className="text-xl font-semibold">Safe & Secure</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   Non-custodial. Your wallet, your coins. Built on Base L2.
                 </p>
               </div>
-
             </div>
 
-            {/* How it works WITH GRAPHIC BADGES */}
+            {/* Games Section */}
+            <div className="pt-32 space-y-12">
+              <h2 className="text-4xl font-bold thunder-gradient">Play Now</h2>
+              <div className="max-w-2xl mx-auto">
+                <KenoGame />
+              </div>
+            </div>
+
+            {/* How it works */}
             <div className="pt-32 space-y-12">
               <h2 className="text-4xl font-bold thunder-gradient">How It Works</h2>
               
@@ -104,7 +106,7 @@ export default function Home() {
                   <div className="step-badge mx-auto">2</div>
                   <h3 className="text-xl font-semibold">Play Epic Games</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                    CoinFlip, Dice, Slots. All provably fair. Bet your Thunders in casual arcade games.
+                    KENO, Slots, Dice. All provably fair. Bet your Thunders in casual arcade games.
                   </p>
                 </div>
 
@@ -112,10 +114,9 @@ export default function Home() {
                   <div className="step-badge mx-auto">3</div>
                   <h3 className="text-xl font-semibold">Convert & Compete</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                    Exchange Thunder Coins back to USDC anytime. Compete on leaderboards for bragging rights!
+                    Exchange Thunder Coins back to USDC anytime. Compete on leaderboards for rewards!
                   </p>
                 </div>
-
               </div>
             </div>
 

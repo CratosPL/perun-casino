@@ -2,8 +2,14 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+solc_version = "0.8.20"
 
+# ============ NETWORKS ============
+[rpc_endpoints]
+base = "https://mainnet.base.org"
+base_sepolia = "https://sepolia.base.org"
+
+# ============ ETHERSCAN ============
 [etherscan]
 base = { key = "${BASESCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=8453" }
-
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+base_sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api.sepolia.basescan.org/api" }
