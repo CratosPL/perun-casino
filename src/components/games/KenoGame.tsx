@@ -16,13 +16,11 @@ export function KenoGame() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [result, setResult] = useState<{ matched: number; payout: number } | null>(null);
   
-  // ✅ Odczytaj gameBalance z blockchain'u
   const { data: blockchainBalance, refetch: refetchBalance } = useReadContract({
     address: CONTRACTS.GAME_REWARDS,
     abi: GameRewardsABI,
     functionName: 'gameBalance',
     args: address ? [address] : undefined,
-    enabled: !!address,
   });
 
   const handleDeposit = async () => {
@@ -30,7 +28,6 @@ export function KenoGame() {
     
     try {
       const amount = parseUnits(depositAmount, 18);
-      
       const depositData = encodeFunctionData({
         abi: GameRewardsABI,
         functionName: 'depositThunderForGaming',
@@ -38,16 +35,10 @@ export function KenoGame() {
       });
       
       await sendCalls({
-        calls: [
-          {
-            to: CONTRACTS.GAME_REWARDS,
-            data: depositData,
-          },
-        ],
+        calls: [{ to: CONTRACTS.GAME_REWARDS, data: depositData }],
         account: address,
       });
       
-      // ✅ Czekaj i odśwież balance
       setTimeout(() => {
         refetchBalance();
         setGameBalance(Number(depositAmount));
@@ -59,11 +50,7 @@ export function KenoGame() {
   };
   
   const playKeno = () => {
-    // ✅ Sprawdź czy ma Thunder
-    if (selectedNumbers.length === 0 || gameBalance < 10) {
-      alert('Select numbers and have enough balance!');
-      return;
-    }
+    if (selectedNumbers.length === 0 || gameBalance < 10) return;
     
     const drawn: number[] = [];
     while (drawn.length < 20) {
@@ -102,12 +89,7 @@ export function KenoGame() {
       });
       
       await sendCalls({
-        calls: [
-          {
-            to: CONTRACTS.GAME_REWARDS,
-            data: withdrawData,
-          },
-        ],
+        calls: [{ to: CONTRACTS.GAME_REWARDS, data: withdrawData }],
         account: address,
       });
       
@@ -119,36 +101,17 @@ export function KenoGame() {
   };
   
   if (!isConnected) {
-    return (
-      <div className="glass-card p-8">
-        <p className="text-center text-sm">🚀 Open in Farcaster to connect</p>
-      </div>
-    );
+    return <div className="glass-card p-8"><p className="text-center text-sm">🚀 Open in Farcaster to connect</p></div>;
   }
   
-  // ✅ Sprawdzenie: czy ma zdeponowany Thunder?
   const hasDeposit = blockchainBalance && blockchainBalance > 0n;
   
   if (!gameActive && !hasDeposit) {
     return (
       <div className="glass-card p-8 space-y-4">
         <h2 className="text-2xl font-bold text-center">🎰 KENO</h2>
-        <div>
-          <label className="text-sm opacity-70">Deposit Thunder to Play</label>
-          <input
-            type="number"
-            value={depositAmount}
-            onChange={(e) => setDepositAmount(e.target.value)}
-            className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg text-white"
-            min="1"
-            step="10"
-          />
-        </div>
-        <button
-          onClick={handleDeposit}
-          disabled={isSending}
-          className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold disabled:opacity-50"
-        >
+        <input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-lg text-white" min="1" step="10" />
+        <button onClick={handleDeposit} disabled={isSending} className="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold disabled:opacity-50">
           {isSending ? '⏳ Processing...' : '💳 Deposit & Play'}
         </button>
       </div>
@@ -159,58 +122,23 @@ export function KenoGame() {
     <div className="glass-card p-8 space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">🎰 KENO</h2>
-        <div className="text-right">
-          <p className="text-sm opacity-70">Balance</p>
-          <p className="text-xl font-bold">{gameBalance} ⚡</p>
-        </div>
+        <p className="text-xl font-bold">{gameBalance} ⚡</p>
       </div>
-      
       <div>
         <p className="text-sm opacity-70 mb-3">Select 1-10 numbers</p>
         <div className="grid grid-cols-10 gap-2">
           {Array.from({ length: 80 }, (_, i) => i + 1).map((num) => (
-            <button
-              key={num}
-              onClick={() => toggleNumber(num)}
-              className={`py-2 rounded text-xs font-bold transition ${
-                selectedNumbers.includes(num)
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-black/40 border border-purple-500/30 hover:border-purple-500/60'
-              }`}
-            >
+            <button key={num} onClick={() => toggleNumber(num)} className={`py-2 rounded text-xs font-bold ${selectedNumbers.includes(num) ? 'bg-purple-600 text-white' : 'bg-black/40 border border-purple-500/30'}`}>
               {num}
             </button>
           ))}
         </div>
       </div>
-      
-      {result && (
-        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-          <p className="text-sm">Matched: {result.matched} numbers</p>
-          <p className="text-lg font-bold text-green-400">+{result.payout} ⚡</p>
-        </div>
-      )}
-      
+      {result && <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg"><p className="text-sm">Matched: {result.matched}</p><p className="text-lg font-bold text-green-400">+{result.payout} ⚡</p></div>}
       <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={playKeno}
-          disabled={selectedNumbers.length === 0 || gameBalance < 10}
-          className="py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-bold disabled:opacity-50"
-        >
-          🎲 Play (10⚡)
-        </button>
-        <button
-          onClick={handleWithdraw}
-          disabled={isSending}
-          className="py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold disabled:opacity-50"
-        >
-          {isSending ? '⏳ ...' : '💰 Withdraw'}
-        </button>
+        <button onClick={playKeno} disabled={selectedNumbers.length === 0 || gameBalance < 10} className="py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-bold disabled:opacity-50">🎲 Play (10⚡)</button>
+        <button onClick={handleWithdraw} disabled={isSending} className="py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold disabled:opacity-50">{isSending ? '⏳' : '💰'} Withdraw</button>
       </div>
-      
-      <p className="text-xs text-center opacity-50">
-        Selected: {selectedNumbers.length}/10
-      </p>
     </div>
   );
 }
