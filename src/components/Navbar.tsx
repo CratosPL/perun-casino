@@ -18,7 +18,7 @@ export function Navbar() {
           <span className="text-2xl thunder-icon">⚡</span>
           <div>
             <div className="text-xl font-bold tracking-tight thunder-gradient">
-              PERUN
+              Thunder
             </div>
             <div className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
               Casino
@@ -28,6 +28,13 @@ export function Navbar() {
 
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8">
+          <Link 
+            href="/" 
+            className="text-sm font-medium hover:text-white transition"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Home
+          </Link>
           <Link 
             href="/games" 
             className="text-sm font-medium hover:text-white transition"
@@ -42,29 +49,22 @@ export function Navbar() {
           >
             Leaderboard
           </Link>
-          <Link 
-            href="/dashboard" 
-            className="text-sm font-medium hover:text-white transition"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            Dashboard
-          </Link>
         </div>
 
-        {/* Right side - Wallet Connect */}
+        {/* Right side - Points Display */}
         <div className="flex items-center gap-6">
-          {/* Thunder Balance */}
-          <div className="glass-card px-5 py-3 flex items-center gap-3">
-            <span className="text-xl">⚡</span>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">0</span>
-              <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                Thunders
-              </span>
+          {user && (
+            <div className="glass-card px-5 py-3 flex items-center gap-3">
+              <span className="text-xl">⚡</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold">1,000</span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Points
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Wallet Connection */}
           <MiniKitConnect />
         </div>
       </div>

@@ -30,6 +30,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--color-bg-dark);
   color: var(--color-text-primary);
@@ -210,4 +214,234 @@ body::after {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+/* ✅ NEW: FAQ Details/Summary Styles */
+details {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+details[open] {
+  background: linear-gradient(to bottom right, rgba(0, 212, 255, 0.05), rgba(123, 44, 191, 0.05));
+}
+
+details summary {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+  padding-right: 40px;
+}
+
+details summary:hover {
+  color: var(--color-lightning-primary);
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+/* Animate arrow rotation */
+details summary span:last-child {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+details[open] summary span:last-child {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* ✅ NEW: Code Block Styles */
+code {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-size: 0.9em;
+  padding: 2px 6px;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+pre code {
+  display: block;
+  padding: 16px;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+
+/* Code syntax highlighting colors */
+.text-blue-400 {
+  color: var(--color-lightning-primary);
+}
+
+.text-purple-400 {
+  color: var(--color-lightning-purple);
+}
+
+.text-green-400 {
+  color: #10B981;
+}
+
+.text-yellow-400 {
+  color: #FBBF24;
+}
+
+/* ✅ NEW: Smooth scrolling for anchor links */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ✅ NEW: Selection styling */
+::selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: var(--color-text-primary);
+}
+
+::-moz-selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ✅ NEW: Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-lightning-primary), var(--color-lightning-purple));
+  border-radius: 6px;
+  border: 2px solid var(--color-bg-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-lightning-secondary), var(--color-lightning-violet));
+}
+
+/* ✅ NEW: Focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-lightning-primary);
+  outline-offset: 4px;
+}
+
+/* ✅ NEW: Responsive adjustments */
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 16px;
+  }
+
+  .step-badge {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+  }
+}
+
+/* ✅ NEW: Loading animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ✅ NEW: Disabled state */
+button:disabled,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ✅ NEW: Input styles */
+input[type="number"],
+input[type="text"] {
+  background: rgba(15, 20, 51, 0.8);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--color-lightning-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+input[type="number"]:hover,
+input[type="text"]:hover {
+  border-color: var(--color-border-hover);
+}
+
+/* ✅ NEW: Table styles (dla leaderboard) */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+table th {
+  text-align: left;
+  padding: 12px 16px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+table td {
+  padding: 16px;
+  background: rgba(15, 20, 51, 0.6);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+table td:first-child {
+  border-left: 1px solid var(--color-border);
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+table td:last-child {
+  border-right: 1px solid var(--color-border);
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+table tr:hover td {
+  background: rgba(15, 20, 51, 0.9);
+  border-color: var(--color-border-hover);
 }
