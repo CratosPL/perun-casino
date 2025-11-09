@@ -50,7 +50,7 @@ export default function GamesPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pt-32 pb-20 relative z-10">
+<main className="min-h-screen pt-20 pb-24 relative z-10">
         <div className="container mx-auto px-6">
           
           {/* Header */}
