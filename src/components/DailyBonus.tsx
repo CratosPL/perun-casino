@@ -1,81 +1,108 @@
-'use client'
-import { useState } from 'react'
+'use client';
 
-interface Props {
-  fid: number
-  lastClaimed?: string
-  streak: number
-  onClaimed: (bonus: number, newBalance: number) => void
-}
+import { useState } from 'react';
 
-export default function DailyBonus({ fid, lastClaimed, streak, onClaimed }: Props) {
-  const [claiming, setClaiming] = useState(false)
-  
-  const canClaim = !lastClaimed || 
-    (new Date().getTime() - new Date(lastClaimed).getTime()) > 24 * 60 * 60 * 1000
-  
-  const nextBonusIn = lastClaimed 
-    ? Math.max(0, 24 * 60 * 60 * 1000 - (new Date().getTime() - new Date(lastClaimed).getTime()))
-    : 0
-  
-  const formatTime = (ms: number) => {
-    const hours = Math.floor(ms / (1000 * 60 * 60))
-    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
-    return `${hours}h ${minutes}m`
-  }
-  
+export default function DailyBonus({ 
+  fid, 
+  streak = 0,
+  onClaimed 
+}: { 
+  fid: number; 
+  streak?: number;
+  onClaimed?: (bonus: number, newBalance: number) => void;
+}) {
+  const [claiming, setClaiming] = useState(false);
+  const [message, setMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
   const handleClaim = async () => {
-    setClaiming(true)
+    setClaiming(true);
+    setMessage('');
+
     try {
       const res = await fetch('/api/daily-bonus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fid })
-      })
-      
-      const data = await res.json()
-      
+      });
+
+      const data = await res.json();
+
       if (data.success) {
-        onClaimed(data.bonus, data.newBalance)
-        alert(`🎉 Claimed ${data.bonus} points! Streak: ${data.streak} days`)
+        const bonusAmount = data.bonus;
+        const newBalance = data.newBalance;
+        
+        // ✅ SHOW SUCCESS TOAST
+        setMessage(`🎁 Claimed ${bonusAmount} points! Streak: ${data.streak} days`);
+        setShowToast(true);
+        
+        // Hide toast after 3s
+        setTimeout(() => setShowToast(false), 3000);
+        
+        if (onClaimed) {
+          onClaimed(bonusAmount, newBalance);
+        }
       } else {
-        alert(data.error || 'Failed to claim')
+        setMessage(`❌ ${data.error}`);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       }
     } catch (error) {
-      console.error(error)
-      alert('Network error')
+      setMessage('❌ Network error');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } finally {
-      setClaiming(false)
+      setClaiming(false);
     }
-  }
-  
+  };
+
+  const estimatedBonus = 100 + (streak * 10);
+
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center justify-between">
+    <>
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+          <div className={`glass-card px-6 py-4 ${
+            message.includes('❌') ? 'border-red-500' : 'border-green-500'
+          }`}>
+            <div className="text-center font-semibold">{message}</div>
+          </div>
+        </div>
+      )}
+
+      <div className="glass-card p-8 text-center space-y-6">
+        <div className="text-6xl mb-4">🎁</div>
+        
         <div>
-          <h3 className="text-xl font-bold mb-1">Daily Bonus</h3>
-          <p className="text-sm text-gray-400">
-            {streak > 0 ? `🔥 ${streak} day streak!` : 'Start your streak'}
+          <h3 className="text-2xl font-bold mb-2">Daily Bonus</h3>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            Claim your free points every 24 hours
           </p>
         </div>
-        
+
+        <div className="text-4xl font-bold thunder-gradient">
+          +{estimatedBonus} pts
+        </div>
+
+        {streak > 0 && (
+          <div className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+            🔥 Current streak: {streak} days
+          </div>
+        )}
+
         <button
           onClick={handleClaim}
-          disabled={!canClaim || claiming}
-          className={`
-            px-6 py-3 rounded-lg font-bold transition-all
-            ${canClaim 
-              ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:scale-105' 
-              : 'bg-gray-600 cursor-not-allowed'}
-          `}
+          disabled={claiming}
+          className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold text-lg rounded-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          {claiming ? 'Claiming...' : canClaim ? '🎁 Claim' : `⏰ ${formatTime(nextBonusIn)}`}
+          {claiming ? 'Claiming...' : 'Claim Now'}
         </button>
+
+        <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          Base: 100 pts + Streak bonus: {streak * 10} pts
+        </div>
       </div>
-      
-      <div className="mt-4 text-xs text-gray-500">
-        Base: 100 points + {streak * 10} streak bonus
-      </div>
-    </div>
-  )
+    </>
+  );
 }

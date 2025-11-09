@@ -50,10 +50,9 @@ export default function GamesPage() {
   return (
     <>
       <Navbar />
-<main className="min-h-screen pt-20 pb-24 relative z-10">
+      <main className="min-h-screen pt-20 pb-24 relative z-10">
         <div className="container mx-auto px-6">
           
-          {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               <span className="thunder-gradient">All Games</span>
@@ -63,14 +62,12 @@ export default function GamesPage() {
             </p>
           </div>
 
-          {/* Games Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {games.map((game) => (
               <div
                 key={game.id}
                 className="glass-card p-6 space-y-4 relative overflow-hidden"
               >
-                {/* Status Badge */}
                 {game.status === 'live' ? (
                   <div className="absolute top-4 right-4">
                     <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full">
@@ -86,10 +83,8 @@ export default function GamesPage() {
                   </div>
                 )}
 
-                {/* Game Icon */}
                 <div className="text-6xl mb-4">{game.icon}</div>
 
-                {/* Game Info */}
                 <div>
                   <h3 className="text-2xl font-bold mb-2">{game.name}</h3>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -97,7 +92,6 @@ export default function GamesPage() {
                   </p>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-700">
                   <div>
                     <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -119,9 +113,9 @@ export default function GamesPage() {
                   </div>
                 </div>
 
-                {/* Play Button */}
+                {/* ✅ POPRAWIONY LINK */}
                 {game.status === 'live' ? (
-                  <Link href={`/#${game.id}`}>
+                  <Link href={`/games/${game.id}`}>
                     <button className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 transition-all">
                       Play Now
                     </button>
@@ -138,7 +132,6 @@ export default function GamesPage() {
             ))}
           </div>
 
-          {/* Info Box */}
           <div className="max-w-4xl mx-auto mt-16 glass-card p-8 text-center">
             <h3 className="text-xl font-bold mb-3">🔒 All Games are Provably Fair</h3>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>

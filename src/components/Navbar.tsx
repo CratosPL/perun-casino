@@ -4,22 +4,62 @@ import Link from 'next/link';
 import { MiniKitConnect } from './MiniKitConnect';
 import { useMiniKit } from '@/lib/minikit-provider';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 export function Navbar() {
   const { user } = useMiniKit();
   const pathname = usePathname();
+  const [points, setPoints] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const isActive = (path: string) => pathname === path;
 
+  // ✅ POPRAWKA: użyj createClient zamiast createClientComponentClient
+  useEffect(() => {
+    if (!user?.fid) {
+      setLoading(false);
+      return;
+    }
+
+    const loadPoints = async () => {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+
+        const { data } = await supabase
+          .from('user_points')
+          .select('points')
+          .eq('fid', user.fid)
+          .single();
+
+        if (data) {
+          setPoints(data.points);
+        }
+      } catch (error) {
+        console.error('Failed to load points:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPoints();
+
+    // Refresh co 5 sekund
+    const interval = setInterval(loadPoints, 5000);
+    return () => clearInterval(interval);
+  }, [user?.fid]);
+
   return (
     <>
-      {/* Top Bar - tylko Logo + Points */}
+      {/* Top Bar */}
       <nav className="fixed top-0 w-full z-50 backdrop-blur-xl border-b" style={{ 
         background: 'rgba(10, 14, 39, 0.95)',
         borderColor: 'var(--color-border)'
       }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <span className="text-xl thunder-icon">⚡</span>
             <div>
@@ -29,12 +69,15 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Points Display */}
           {user && (
             <div className="glass-card px-3 py-2 flex items-center gap-2">
               <span className="text-lg">⚡</span>
               <div className="flex flex-col leading-tight">
-                <span className="text-xs font-semibold">1,000</span>
+                {loading ? (
+                  <span className="text-xs">...</span>
+                ) : (
+                  <span className="text-xs font-semibold">{points.toLocaleString()}</span>
+                )}
                 <span className="text-[8px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
                   pts
                 </span>
@@ -44,15 +87,14 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* ✅ NOWE: Bottom Navigation (Mobile First) */}
+      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 w-full z-50 backdrop-blur-xl border-t safe-area-bottom" style={{ 
         background: 'rgba(10, 14, 39, 0.95)',
         borderColor: 'var(--color-border)',
-        paddingBottom: 'env(safe-area-inset-bottom)' // iPhone notch
+        paddingBottom: 'env(safe-area-inset-bottom)'
       }}>
         <div className="container mx-auto px-2 h-16 flex items-center justify-around">
           
-          {/* Home */}
           <Link 
             href="/" 
             className={`flex flex-col items-center justify-center flex-1 py-2 transition-all ${
@@ -65,11 +107,10 @@ export function Navbar() {
             <span className="text-[10px] font-medium">Home</span>
           </Link>
 
-          {/* Games */}
           <Link 
             href="/games" 
             className={`flex flex-col items-center justify-center flex-1 py-2 transition-all ${
-              isActive('/games') ? 'text-yellow-400' : 'text-gray-400 hover:text-white'
+              pathname.startsWith('/games') ? 'text-yellow-400' : 'text-gray-400 hover:text-white'
             }`}
           >
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +120,6 @@ export function Navbar() {
             <span className="text-[10px] font-medium">Games</span>
           </Link>
 
-          {/* Leaderboard */}
           <Link 
             href="/leaderboard" 
             className={`flex flex-col items-center justify-center flex-1 py-2 transition-all ${
@@ -92,7 +132,6 @@ export function Navbar() {
             <span className="text-[10px] font-medium">Ranks</span>
           </Link>
 
-          {/* Profile/Account */}
           <button 
             className={`flex flex-col items-center justify-center flex-1 py-2 transition-all ${
               user ? 'text-green-400' : 'text-gray-400 hover:text-white'
@@ -117,10 +156,6 @@ export function Navbar() {
 
         </div>
       </nav>
-
-      {/* Spacers - aby content nie był zasłonięty */}
-      <div className="h-16"></div> {/* Top spacer */}
-      <div className="h-16"></div> {/* Bottom spacer */}
     </>
   );
 }
