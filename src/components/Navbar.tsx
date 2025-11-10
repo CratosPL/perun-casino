@@ -31,11 +31,11 @@ export function Navbar() {
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
 
-        const { data, error } = await supabase
-          .from('user_points')
-          .select('points')
-          .eq('fid', user.fid)
-          .single();
+const { data, error } = await supabase
+  .from('user_points')
+  .select('points')
+  .eq('fid', user.fid)
+  .maybeSingle(); // ✅ zamiast .single()
 
         console.log('📊 Supabase response:', { data, error }); // ✅ DEBUG
 
@@ -76,25 +76,22 @@ export function Navbar() {
             </div>
           </Link>
 
-          {user && (
-            <div className="glass-card px-3 py-2 flex items-center gap-2">
-              <span className="text-lg">⚡</span>
-              <div className="flex flex-col leading-tight">
-                {loading ? (
-                  <span className="text-xs">...</span>
-                ) : (
-                  <>
-                    <span className="text-xs font-semibold">{points.toLocaleString()}</span>
-                    {/* ✅ DEBUG: Pokazuj FID */}
-                    <span className="text-[8px] text-gray-500">FID: {user.fid}</span>
-                  </>
-                )}
-                <span className="text-[8px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-                  pts
-                </span>
-              </div>
-            </div>
-          )}
+{user && (
+  <div className="glass-card px-3 py-2 flex items-center gap-2">
+    <span className="text-lg">⚡</span>
+    <div className="flex flex-col leading-tight">
+      {loading ? (
+        <span className="text-xs text-gray-400">...</span>
+      ) : (
+        <span className="text-xs font-semibold">{points.toLocaleString()}</span>
+      )}
+      <span className="text-[8px] uppercase tracking-wider text-gray-400">
+        pts
+      </span>
+    </div>
+  </div>
+)}
+
         </div>
       </nav>
 
