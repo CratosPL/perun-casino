@@ -15,31 +15,38 @@ export function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
-  // ✅ POPRAWKA: użyj createClient zamiast createClientComponentClient
   useEffect(() => {
     if (!user?.fid) {
+      console.log('❌ No user FID:', user); // ✅ DEBUG
       setLoading(false);
       return;
     }
 
     const loadPoints = async () => {
       try {
+        console.log('🔍 Loading points for FID:', user.fid); // ✅ DEBUG
+        
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('user_points')
           .select('points')
           .eq('fid', user.fid)
           .single();
 
+        console.log('📊 Supabase response:', { data, error }); // ✅ DEBUG
+
         if (data) {
           setPoints(data.points);
+          console.log('✅ Points loaded:', data.points); // ✅ DEBUG
+        } else {
+          console.log('❌ No data found for FID:', user.fid); // ✅ DEBUG
         }
       } catch (error) {
-        console.error('Failed to load points:', error);
+        console.error('❌ Failed to load points:', error);
       } finally {
         setLoading(false);
       }
@@ -76,7 +83,11 @@ export function Navbar() {
                 {loading ? (
                   <span className="text-xs">...</span>
                 ) : (
-                  <span className="text-xs font-semibold">{points.toLocaleString()}</span>
+                  <>
+                    <span className="text-xs font-semibold">{points.toLocaleString()}</span>
+                    {/* ✅ DEBUG: Pokazuj FID */}
+                    <span className="text-[8px] text-gray-500">FID: {user.fid}</span>
+                  </>
                 )}
                 <span className="text-[8px] uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
                   pts
