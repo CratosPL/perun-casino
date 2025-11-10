@@ -10,18 +10,18 @@ export async function GET() {
     },
     miniapp: {
       version: "1",
-      name: "Perun Casino",
-      subtitle: "Free Arcade Games", // ✅ ZMIENIONE: God of Thunder → Free Arcade
-      description: "Play provably fair arcade games with points. Compete on leaderboards, claim daily bonuses, and have fun. No crypto required.", // ✅ ZMIENIONE: usunięto Thunder Coins/USDC
+      name: "Thunder Casino",                              // ✅ COFNIĘTE
+      subtitle: "God of Thunder Games",                    // ✅ COFNIĘTE
+      description: "Play provably fair arcade games with points. Compete on leaderboards, claim daily bonuses, and have fun. Free to play.",
       primaryCategory: "games",
-      tags: ["arcade", "leaderboard", "points", "free", "casino"], // ✅ ZMIENIONE: crypto → points, base → free
-      tagline: "Play. Compete. Win.", // ✅ ZMIENIONE: Convert → Win
+      tags: ["arcade", "leaderboard", "casino", "points", "free"],
+      tagline: "Play. Compete. Win.",
       iconUrl: "https://perun-casino.vercel.app/icon.png",
       homeUrl: "https://perun-casino.vercel.app",
       splashImageUrl: "https://perun-casino.vercel.app/splash.png",
       splashBackgroundColor: "#0A0E27",
       webhookUrl: "https://perun-casino.vercel.app/api/webhook",
-      requiredChains: ["eip155:8453"], // Można zostawić dla przyszłości
+      requiredChains: ["eip155:8453"],
       requiredCapabilities: [
         "wallet.getEthereumProvider",
         "actions.signIn"
@@ -36,3 +36,4 @@ export async function GET() {
     },
   });
 }
+
