@@ -37,7 +37,7 @@ export function verifyServerSeed(serverSeed: string, serverSeedHash: string): bo
   return computedHash === serverSeedHash
 }
 
-// Generate Keno numbers from seeds
+// ✅ ZAKTUALIZOWANE: Generate Keno numbers (10 z 40 zamiast 20 z 80)
 export function generateKenoNumbers(
   clientSeed: string,
   serverSeed: string,
@@ -49,7 +49,8 @@ export function generateKenoNumbers(
   let currentHash = hash
   let index = 0
   
-  while (numbers.length < 20) {
+  // ✅ ZMIENIONE: 10 liczb zamiast 20
+  while (numbers.length < 10) {
     // Take 4 characters (2 bytes) from hash
     if (index + 4 > currentHash.length) {
       // Rehash if we run out
@@ -60,8 +61,8 @@ export function generateKenoNumbers(
     const byte = parseInt(currentHash.slice(index, index + 4), 16)
     index += 4
     
-    // Map to 1-80 range
-    const num = (byte % 80) + 1
+    // ✅ ZMIENIONE: Map to 1-40 range (było 1-80)
+    const num = (byte % 40) + 1
     
     // Ensure unique
     if (!numbers.includes(num)) {
@@ -89,7 +90,7 @@ export function verifyGameResult(
   const regeneratedResult = generateKenoNumbers(clientSeed, serverSeed, nonce)
   
   // 3. Compare
-  const resultsMatch = JSON.stringify(regeneratedResult) === JSON.stringify(claimedResult)
+  const resultsMatch = JSON.stringify(regeneratedResult.sort()) === JSON.stringify(claimedResult.sort())
   
   return {
     valid: resultsMatch,

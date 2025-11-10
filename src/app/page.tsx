@@ -1,8 +1,6 @@
 'use client';
 
 import { Navbar } from '@/components/Navbar';
-import KenoGame from '@/components/games/KenoGame';
-import Leaderboard from '@/components/Leaderboard';
 import DailyBonus from '@/components/DailyBonus';
 import { useState, useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
@@ -10,6 +8,8 @@ import { sdk } from '@farcaster/miniapp-sdk';
 export default function Home() {
   const [fid, setFid] = useState<number>(999999);
   const [isDev, setIsDev] = useState(true);
+  const [userStreak, setUserStreak] = useState<number>(0);
+  const [userBalance, setUserBalance] = useState<number>(2500);
 
   useEffect(() => {
     const init = async () => {
@@ -20,6 +20,9 @@ export default function Home() {
         if (context?.user?.fid) {
           setFid(context.user.fid);
           setIsDev(false);
+          
+          // Fetch user data (streak and balance)
+          fetchUserData(context.user.fid);
         }
       } catch (error) {
         console.log('Running in dev mode');
@@ -29,6 +32,24 @@ export default function Home() {
     
     init();
   }, []);
+
+  const fetchUserData = async (userFid: number) => {
+    try {
+      const res = await fetch(`/api/user/${userFid}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserStreak(data.daily_streak || 0);
+        setUserBalance(data.points || 2500);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    }
+  };
+
+  const handleBonusClaimed = (bonus: number, newBalance: number) => {
+    setUserBalance(newBalance);
+    fetchUserData(fid); // Refresh streak
+  };
 
   return (
     <>
@@ -69,10 +90,10 @@ export default function Home() {
               earn daily bonuses, and challenge your friends. No crypto required.
             </p>
 
-            {/* Quick Stats */}
+            {/* Quick Stats - UPDATED */}
             <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto py-8">
               <div className="glass-card p-6">
-                <div className="text-3xl font-bold thunder-gradient">1,000</div>
+                <div className="text-3xl font-bold thunder-gradient">2,500</div>
                 <div className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Starting Points
                 </div>
@@ -120,47 +141,19 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Daily Bonus Section */}
+            {/* Daily Bonus Section - UPDATED */}
             <div className="pt-32 space-y-8">
               <h2 className="text-4xl font-bold thunder-gradient">Daily Rewards</h2>
               <div className="max-w-2xl mx-auto">
                 <DailyBonus 
                   fid={fid}
-                  streak={0}
-                  onClaimed={(bonus, newBalance) => {
-                    console.log('Claimed bonus:', bonus, 'New balance:', newBalance);
-                  }}
+                  streak={userStreak}
+                  onClaimed={handleBonusClaimed}
                 />
               </div>
             </div>
 
-            {/* Games Section */}
-            <div className="pt-32 space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-bold thunder-gradient">Play Keno Now</h2>
-                <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-                  Pick your lucky numbers and test your fortune
-                </p>
-              </div>
-              <div className="max-w-2xl mx-auto">
-                <KenoGame />
-              </div>
-            </div>
-
-            {/* Leaderboard Section */}
-            <div className="pt-32 space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-bold thunder-gradient">Top Players</h2>
-                <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-                  Compete for the highest score and glory
-                </p>
-              </div>
-              <div className="max-w-4xl mx-auto">
-                <Leaderboard myFid={fid} />
-              </div>
-            </div>
-
-            {/* How it Works */}
+            {/* How it Works - UPDATED */}
             <div className="pt-32 space-y-12">
               <h2 className="text-4xl font-bold thunder-gradient">How It Works</h2>
               
@@ -169,7 +162,7 @@ export default function Home() {
                   <div className="step-badge mx-auto">1</div>
                   <h3 className="text-xl font-semibold">Connect & Start</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                    Connect with your Farcaster account. Get 1,000 free points to start playing immediately.
+                    Connect with your Farcaster account. Get <strong>2,500 free points</strong> to start playing immediately.
                   </p>
                 </div>
 
@@ -313,7 +306,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Points & Rewards System */}
+            {/* Points & Rewards System - UPDATED */}
             <div className="pt-32 space-y-12">
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold thunder-gradient">Points & Rewards System</h2>
@@ -324,37 +317,38 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 
-                {/* Starting Points */}
+                {/* Starting Points - UPDATED */}
                 <div className="glass-card p-6 space-y-4">
                   <div className="text-4xl mb-2">🎁</div>
                   <h3 className="text-xl font-bold">Starting Points</h3>
-                  <div className="text-3xl font-bold thunder-gradient">1,000</div>
+                  <div className="text-3xl font-bold thunder-gradient">2,500</div>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    Every new player gets 1,000 free points to start. No purchase required, no wallet needed.
+                    Every new player gets 2,500 free points to start. No purchase required, no wallet needed.
                   </p>
                 </div>
 
-                {/* Daily Bonus */}
+                {/* Daily Bonus - UPDATED */}
                 <div className="glass-card p-6 space-y-4">
                   <div className="text-4xl mb-2">📅</div>
                   <h3 className="text-xl font-bold">Daily Bonus</h3>
-                  <div className="text-3xl font-bold thunder-gradient">100+</div>
+                  <div className="text-3xl font-bold thunder-gradient">100-300</div>
                   <ul className="text-sm space-y-2" style={{ color: 'var(--color-text-secondary)' }}>
                     <li>• Base: <strong>100 points/day</strong></li>
-                    <li>• Streak bonus: <strong>+10 per day</strong></li>
-                    <li>• Max: <strong>500 points</strong></li>
-                    <li>• 24h cooldown</li>
+                    <li>• Streak bonus: <strong>+20 per day</strong></li>
+                    <li>• Max: <strong>300 points/day</strong></li>
+                    <li>• Special: <strong>+500 @ 7 days</strong></li>
+                    <li>• Mega: <strong>+1500 @ 30 days</strong></li>
                   </ul>
                 </div>
 
-                {/* Leaderboard Rewards */}
-                <div className="glass-card p-6 space-y-4">
-                  <div className="text-4xl mb-2">🏆</div>
-                  <h3 className="text-xl font-bold">Weekly Rewards</h3>
-                  <div className="text-3xl font-bold thunder-gradient">Soon</div>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    Top 10 players each week will receive bonus points. Compete for glory and rewards!
-                  </p>
+                {/* Balance Limits - NEW */}
+  <div className="glass-card p-6 space-y-4">
+    <div className="text-4xl mb-2">🚀</div>
+    <h3 className="text-xl font-bold">Unlimited Growth</h3>
+    <div className="text-3xl font-bold thunder-gradient">∞</div>
+    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+      No balance limits! Accumulate as many points as you can and dominate the leaderboard!
+    </p>
                 </div>
               </div>
 
@@ -384,7 +378,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* FAQ Section */}
+            {/* FAQ Section - UPDATED */}
             <div className="pt-32 space-y-12">
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold thunder-gradient">Frequently Asked Questions</h2>
@@ -421,8 +415,8 @@ export default function Home() {
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
                   <p className="mt-4 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    No worries! You can claim <strong>daily bonuses</strong> (100+ points per day). Just come back 
-                    tomorrow and keep playing. We want everyone to have fun, not stress about running out.
+                    No worries! You can claim <strong>daily bonuses</strong> (100-300 points per day, scaling with your streak). 
+                    Plus special bonuses at 7 days (+500) and 30 days (+1500). Just come back daily and keep playing!
                   </p>
                 </details>
 
@@ -472,7 +466,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ✅ POPRAWIONE: Future Vision zamiast Coming Soon */}
+            {/* Future Vision */}
             <div className="pt-32 space-y-8">
               <div className="glass-card p-12 space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" 
