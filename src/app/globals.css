@@ -41,6 +41,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Animated lightning background */
@@ -82,12 +83,13 @@ body::after {
 
 /* Glass card with electric glow */
 .glass-card {
-  background: rgba(15, 20, 51, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .glass-card:hover {
@@ -216,7 +218,7 @@ body::after {
   padding: 0 24px;
 }
 
-/* ✅ NEW: FAQ Details/Summary Styles */
+/* FAQ Details/Summary Styles */
 details {
   transition: all 0.3s ease;
   position: relative;
@@ -232,6 +234,7 @@ details summary {
   transition: all 0.2s ease;
   position: relative;
   padding-right: 40px;
+  list-style: none;
 }
 
 details summary:hover {
@@ -244,6 +247,10 @@ details summary::-webkit-details-marker {
 
 details summary::marker {
   display: none;
+}
+
+details[open] summary {
+  margin-bottom: 0.5rem;
 }
 
 /* Animate arrow rotation */
@@ -259,7 +266,7 @@ details[open] summary span:last-child {
   transform: translateY(-50%) rotate(180deg);
 }
 
-/* ✅ NEW: Code Block Styles */
+/* Code Block Styles */
 code {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
   font-size: 0.9em;
@@ -293,14 +300,7 @@ pre code {
   color: #FBBF24;
 }
 
-/* ✅ NEW: Smooth scrolling for anchor links */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* ✅ NEW: Selection styling */
+/* Selection styling */
 ::selection {
   background: rgba(0, 212, 255, 0.3);
   color: var(--color-text-primary);
@@ -311,7 +311,7 @@ pre code {
   color: var(--color-text-primary);
 }
 
-/* ✅ NEW: Scrollbar styling */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 12px;
 }
@@ -330,7 +330,26 @@ pre code {
   background: linear-gradient(180deg, var(--color-lightning-secondary), var(--color-lightning-violet));
 }
 
-/* ✅ NEW: Focus states for accessibility */
+/* Custom scrollbar dla tabeli wypłat */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Focus states for accessibility */
 button:focus-visible,
 a:focus-visible,
 summary:focus-visible {
@@ -338,42 +357,7 @@ summary:focus-visible {
   outline-offset: 4px;
 }
 
-/* ✅ NEW: Responsive adjustments */
-@media (max-width: 768px) {
-  .glass-card {
-    border-radius: 16px;
-  }
-
-  .step-badge {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-
-  .feature-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 28px;
-  }
-}
-
-/* ✅ NEW: Loading animation */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* ✅ NEW: Disabled state */
+/* Disabled state */
 button:disabled,
 input:disabled {
   opacity: 0.5;
@@ -381,7 +365,7 @@ input:disabled {
   pointer-events: none;
 }
 
-/* ✅ NEW: Input styles */
+/* Input styles */
 input[type="number"],
 input[type="text"] {
   background: rgba(15, 20, 51, 0.8);
@@ -405,7 +389,7 @@ input[type="text"]:hover {
   border-color: var(--color-border-hover);
 }
 
-/* ✅ NEW: Table styles (dla leaderboard) */
+/* Table styles */
 table {
   width: 100%;
   border-collapse: separate;
@@ -446,25 +430,30 @@ table tr:hover td {
   border-color: var(--color-border-hover);
 }
 
-/* ✅ NEW: Bottom Navigation Support (iPhone safe area) */
+/* Bottom Navigation Support */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Prevent content jump when bottom nav appears */
-body {
-  padding-bottom: env(safe-area-inset-bottom);
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: calc(4rem + env(safe-area-inset-top));
+  }
 }
 
-/* Toast animation */
+/* ============================================
+   KENO GAME ANIMATIONS - STAKE STYLE
+   ============================================ */
+
+/* Fade in animation */
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: scale(1);
   }
 }
 
@@ -472,11 +461,148 @@ body {
   animation: fade-in 0.3s ease-out;
 }
 
-/* ============================================
-   KENO GAME STYLES
-   ============================================ */
+/* Szybka pulsacja dla aktualnie losowanej liczby */
+@keyframes pulse-fast {
+  0%, 100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.9;
+  }
+}
 
-/* Pulse animation for drawn numbers */
+.animate-pulse-fast {
+  animation: pulse-fast 0.4s ease-in-out infinite;
+}
+
+/* Efekt flickering dla kandydatów */
+@keyframes flicker {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-flicker {
+  animation: flicker 0.3s ease-in-out infinite;
+}
+
+/* Pojawienie się wylosowanej liczby */
+@keyframes scale-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Ulepszona pulsująca poświata dla trafień */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5),
+                0 0 40px rgba(34, 197, 94, 0.3),
+                inset 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.8),
+                0 0 60px rgba(34, 197, 94, 0.5),
+                0 0 90px rgba(34, 197, 94, 0.3),
+                inset 0 0 30px rgba(34, 197, 94, 0.3);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* Bounce dla ostatnio wylosowanej liczby */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Shimmer effect dla wylosowanych liczb */
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Glow intensywny dla aktualnie losowanej */
+@keyframes glow-intense {
+  0%, 100% {
+    box-shadow: 
+      0 0 10px rgba(251, 191, 36, 0.5),
+      0 0 20px rgba(251, 191, 36, 0.4),
+      0 0 30px rgba(251, 191, 36, 0.3),
+      inset 0 0 10px rgba(251, 191, 36, 0.2);
+    filter: brightness(1.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px rgba(251, 191, 36, 0.8),
+      0 0 40px rgba(251, 191, 36, 0.6),
+      0 0 60px rgba(251, 191, 36, 0.4),
+      inset 0 0 20px rgba(251, 191, 36, 0.3);
+    filter: brightness(1.4);
+  }
+}
+
+/* Number reveal sequence */
+@keyframes reveal-sequence {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.reveal-number {
+  animation: reveal-sequence 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Keno pulse animation */
 @keyframes keno-pulse {
   0%, 100% {
     transform: scale(1);
@@ -492,170 +618,7 @@ body {
   animation: keno-pulse 1s ease-in-out infinite;
 }
 
-/* Glow effect for matches */
-@keyframes keno-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(34, 197, 94, 0.5),
-                0 0 10px rgba(34, 197, 94, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.8),
-                0 0 20px rgba(34, 197, 94, 0.5),
-                0 0 30px rgba(34, 197, 94, 0.3);
-  }
-}
-
-.keno-match {
-  animation: keno-glow 1.5s ease-in-out infinite;
-}
-
-/* Number button hover effect */
-.keno-number {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.keno-number:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.keno-number:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-/* Selected number effect */
-.keno-selected {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
-}
-
-/* Drawn number effect */
-.keno-drawn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-}
-
-/* Match effect (selected + drawn) */
-.keno-match-number {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.6);
-  transform: scale(1.1);
-}
-
-/* Risk level buttons */
-.risk-button {
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.risk-button.active {
-  border-color: #fbbf24;
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-}
-
-/* Glass card effect enhancement for Keno */
-.glass-card {
-  background: rgba(31, 41, 55, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Auto-play progress bar */
-@keyframes progress-bar {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-.autoplay-progress {
-  height: 4px;
-  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
-  animation: progress-bar 3s linear;
-}
-
-/* Payout table highlight */
-.payout-highlight {
-  background: rgba(251, 191, 36, 0.1);
-  border: 2px solid #fbbf24;
-  transform: scale(1.05);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .keno-number {
-    font-size: 0.875rem;
-    padding: 0.5rem;
-  }
-}
-
-/* Loading spinner for game */
-@keyframes keno-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.keno-loading {
-  animation: keno-spin 1s linear infinite;
-}
-
-/* Win celebration animation */
-@keyframes celebrate {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-  }
-  25% {
-    transform: scale(1.1) rotate(-5deg);
-  }
-  75% {
-    transform: scale(1.1) rotate(5deg);
-  }
-}
-
-.win-celebration {
-  animation: celebrate 0.5s ease-in-out 3;
-}
-
-/* Result banner styles */
-.result-banner {
-  transition: all 0.3s ease;
-}
-
-.result-banner.win {
-  background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
-  border: 2px solid #10b981;
-}
-
-.result-banner.lose {
-  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
-  border: 2px solid #ef4444;
-}
-
-/* ============================================
-   THUNDER KENO - Enhanced Styles
-   ============================================ */
-
-/* Glass card effect */
-.glass-card {
-  background: rgba(31, 41, 55, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* Number button animations */
-@keyframes number-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
+/* Match celebration */
 @keyframes match-celebrate {
   0% {
     transform: scale(1) rotate(0deg);
@@ -672,6 +635,10 @@ body {
   100% {
     transform: scale(1.1) rotate(0deg);
   }
+}
+
+.keno-match-number {
+  animation: match-celebrate 0.6s ease-in-out;
 }
 
 /* Winner banner glow */
@@ -691,21 +658,6 @@ body {
   animation: winner-glow 2s ease-in-out infinite;
 }
 
-/* Number grid hover effects */
-.keno-number-cell:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.2);
-}
-
-.keno-number-cell:active {
-  transform: translateY(0);
-}
-
-/* Match animation */
-.keno-match-number {
-  animation: match-celebrate 0.6s ease-in-out;
-}
-
 /* Drawn number pulse */
 @keyframes drawn-pulse {
   0%, 100% {
@@ -720,13 +672,6 @@ body {
 
 .drawn-number-animate {
   animation: drawn-pulse 1.5s ease-in-out infinite;
-}
-
-/* Payout table hover */
-.payout-row:hover {
-  background: rgba(251, 191, 36, 0.1);
-  transform: scale(1.02);
-  transition: all 0.2s ease;
 }
 
 /* Result banner slide in */
@@ -745,19 +690,18 @@ body {
   animation: slide-down 0.3s ease-out;
 }
 
-/* Loading spinner for game */
-@keyframes spin-fast {
-  to {
-    transform: rotate(360deg);
-  }
+.result-banner.win {
+  background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+  border: 2px solid #10b981;
 }
 
-.spinner-game {
-  animation: spin-fast 0.6s linear infinite;
+.result-banner.lose {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+  border: 2px solid #ef4444;
 }
 
-/* Auto-play progress */
-@keyframes auto-progress {
+/* Progress bar animation */
+@keyframes progress-bar {
   from {
     width: 0%;
   }
@@ -766,13 +710,70 @@ body {
   }
 }
 
-.auto-progress-bar {
-  animation: auto-progress 3s linear;
+.autoplay-progress {
+  height: 4px;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  animation: progress-bar 3s linear;
 }
 
-/* Button press effect */
-.button-press:active {
-  transform: scale(0.95);
+/* Expand/collapse animation */
+@keyframes expand-down {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 400px;
+  }
+}
+
+.payout-expand {
+  animation: expand-down 0.3s ease-out;
+}
+
+/* Payout row animations */
+.payout-row:hover,
+.payout-row-hover:hover {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.05), transparent);
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
+
+@keyframes pulse-highlight {
+  0%, 100% {
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    border-color: rgba(251, 191, 36, 0.6);
+  }
+}
+
+.payout-active {
+  animation: pulse-highlight 2s ease-in-out infinite;
+}
+
+.payout-highlight {
+  background: rgba(251, 191, 36, 0.1);
+  border: 2px solid #fbbf24;
+  transform: scale(1.05);
+}
+
+/* Win celebration */
+@keyframes celebrate {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.win-celebration {
+  animation: celebrate 0.5s ease-in-out 3;
 }
 
 /* Gradient text for wins */
@@ -793,109 +794,134 @@ body {
   }
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .keno-board {
-    gap: 0.25rem;
-  }
-  
-  .keno-number-cell {
-    font-size: 0.875rem;
-  }
-  
-  .payout-table {
-    font-size: 0.75rem;
+/* Loading spinners */
+@keyframes keno-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* High contrast mode for accessibility */
-@media (prefers-contrast: high) {
-  .glass-card {
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-  
-  .keno-number-cell {
-    border: 1px solid currentColor;
-  }
+.keno-loading {
+  animation: keno-spin 1s linear infinite;
 }
 
-/* Reduced motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+@keyframes spin-fast {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Custom scrollbar dla tabeli wypłat */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+.spinner-game {
+  animation: spin-fast 0.6s linear infinite;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(31, 41, 55, 0.5);
-  border-radius: 10px;
+/* Number button styles */
+.keno-number {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
-  border-radius: 10px;
+.keno-number:hover:not(:disabled),
+.keno-number-cell:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.7);
+.keno-number:active:not(:disabled),
+.keno-number-cell:active {
+  transform: translateY(0);
 }
 
-/* Smooth collapse animation */
-details summary {
-  list-style: none;
+.keno-selected {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
 }
 
-details summary::-webkit-details-marker {
-  display: none;
+.keno-drawn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-details[open] summary {
-  margin-bottom: 0.5rem;
+/* Risk level buttons */
+.risk-button {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
-/* Mobile optimization */
-@media (max-width: 640px) {
-  .custom-scrollbar {
-    max-height: 300px !important;
-  }
+.risk-button.active {
+  border-color: #fbbf24;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+/* Button press effect */
+.button-press:active {
+  transform: scale(0.95);
 }
 
 /* ============================================
-   KENO PAYOUT TABLE - HORIZONTAL LAYOUT
+   PERFORMANCE OPTIMIZATIONS
    ============================================ */
 
-/* Smooth expand/collapse */
-@keyframes expand-down {
-  from {
-    opacity: 0;
-    max-height: 0;
+/* Hardware acceleration */
+.animate-pulse-fast,
+.animate-pulse-glow,
+.animate-flicker,
+.animate-scale-in,
+.animate-bounce {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Wyłącz will-change po zakończeniu */
+.animation-ended {
+  will-change: auto;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 16px;
   }
-  to {
-    opacity: 1;
-    max-height: 400px;
+
+  .step-badge {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+  }
+
+  .keno-number,
+  .keno-number-cell {
+    font-size: 0.875rem;
+  }
+
+  .keno-board {
+    gap: 0.25rem;
+  }
+
+  .payout-table {
+    font-size: 0.75rem;
+  }
+
+  /* Zmniejsz intensywność animacji na mobile */
+  .animate-pulse-glow,
+  .animate-pulse-fast,
+  .animate-flicker {
+    animation-duration: calc(var(--animation-duration, 1s) * 1.5);
   }
 }
 
-.payout-expand {
-  animation: expand-down 0.3s ease-out;
-}
-
-/* Hover effect for payout rows */
-.payout-row-hover:hover {
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.05), transparent);
-  transform: translateX(2px);
-}
-
-/* Compact scrollbar for mobile */
 @media (max-width: 640px) {
   .custom-scrollbar {
     max-height: 280px !important;
@@ -906,40 +932,35 @@ details[open] summary {
   }
 }
 
-/* Pulse effect for active row */
-@keyframes pulse-highlight {
-  0%, 100% {
-    border-color: rgba(251, 191, 36, 0.3);
-  }
-  50% {
-    border-color: rgba(251, 191, 36, 0.6);
-  }
-}
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
 
-.payout-active {
-  animation: pulse-highlight 2s ease-in-out infinite;
-}
-
-
-/* Fade in animation dla result overlay */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .glass-card {
+    border: 2px solid rgba(255, 255, 255, 0.3);
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  
+  .keno-number-cell {
+    border: 1px solid currentColor;
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* Safe area dla mobile */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .safe-area-top {
-    padding-top: calc(4rem + env(safe-area-inset-top));
+/* Smooth scrolling (when motion is allowed) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 type RiskLevel = 'Classic' | 'Low' | 'Medium' | 'High';
@@ -68,11 +68,7 @@ const HIT_PROBABILITIES: Record<number, Record<number, string>> = {
   10: { 0: '3.5443%', 1: '16.878%', 2: '31.071%', 3: '28.820%', 4: '14.710%', 5: '4.236%', 6: '0.678%', 7: '0.05747%', 8: '0.002309%', 9: '0.00003539%', 10: '0.00000012%' }
 };
 
-export default function KenoGame({
-  onPointsChange
-}: {
-  onPointsChange?: (points: number) => void
-}) {
+export default function KenoGame({ onPointsChange }: { onPointsChange?: (points: number) => void }) {
   const [fid, setFid] = useState<number>(0);
   const [points, setPoints] = useState(2500);
   const [loading, setLoading] = useState(true);
@@ -87,13 +83,15 @@ export default function KenoGame({
   const [serverSeedHash, setServerSeedHash] = useState<string>('');
   const [showProvablyFair, setShowProvablyFair] = useState(false);
   const [showPayoutInfo, setShowPayoutInfo] = useState(false);
-  const [animatingNumbers, setAnimatingNumbers] = useState<number[]>([]);
+  
+  const [revealedNumbers, setRevealedNumbers] = useState<number[]>([]);
+  const [currentlyDrawing, setCurrentlyDrawing] = useState<number | null>(null);
+  const lastClickTime = useRef<number>(0);
 
   useEffect(() => {
     if (onPointsChange) onPointsChange(points);
   }, [points, onPointsChange]);
 
-  // ✅ FIXED: Fetch real points from API
   useEffect(() => {
     const init = async () => {
       try {
@@ -102,8 +100,6 @@ export default function KenoGame({
         if (context?.user?.fid) {
           setFid(context.user.fid);
           setIsDev(false);
-          
-          // ✅ FETCH REAL POINTS FROM API
           try {
             const res = await fetch(`/api/user/${context.user.fid}`);
             if (res.ok) {
@@ -135,10 +131,7 @@ export default function KenoGame({
 
   useEffect(() => {
     if (lastResult && !isPlaying) {
-      const timer = setTimeout(() => {
-        setLastResult(null);
-      }, 3000);
-      
+      const timer = setTimeout(() => setLastResult(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [lastResult, isPlaying]);
@@ -156,10 +149,20 @@ export default function KenoGame({
   const toggleNumber = (num: number) => {
     if (isPlaying) return;
     
+    const now = Date.now();
+    if (now - lastClickTime.current < 150) return;
+    lastClickTime.current = now;
+    
     if (selectedNumbers.includes(num)) {
-      setSelectedNumbers(selectedNumbers.filter(n => n !== num));
+      return;
     } else if (selectedNumbers.length < numberOfPicks) {
       setSelectedNumbers([...selectedNumbers, num]);
+    }
+  };
+
+  const deselectNumber = (num: number) => {
+    if (!isPlaying) {
+      setSelectedNumbers(selectedNumbers.filter(n => n !== num));
     }
   };
 
@@ -185,6 +188,42 @@ export default function KenoGame({
     return betAmount * maxMultiplier;
   };
 
+  // ✅ UPROSZCZONA ANIMACJA - Stake-style (bez flickeringu)
+  const animateDrawnNumbers = async (drawnNumbers: number[]) => {
+    // ⚙️ USTAWIENIA CZASU (dostosuj tutaj)
+    const FLASH_DURATION = 100;        // Czas błysku liczby
+    const NORMAL_PAUSE = 80;          // Pauza między liczbami
+    const HIT_PAUSE = 0;             // Pauza po trafieniu
+    const FINAL_PAUSE = 300;           // Pauza przed wynikiem
+    
+    setRevealedNumbers([]);
+    setCurrentlyDrawing(null);
+    
+    const localRevealed: number[] = [];
+    
+    for (let i = 0; i < drawnNumbers.length; i++) {
+      const currentNum = drawnNumbers[i];
+      
+      // Podświetl aktualnie losowaną liczbę
+      setCurrentlyDrawing(currentNum);
+      await new Promise(resolve => setTimeout(resolve, FLASH_DURATION));
+      
+      // Dodaj do wylosowanych
+      localRevealed.push(currentNum);
+      setRevealedNumbers([...localRevealed]);
+      setCurrentlyDrawing(null);
+      
+      // Pauza (dłuższa przy trafieniu)
+      const isMatch = selectedNumbers.includes(currentNum);
+      const pauseDuration = isMatch ? HIT_PAUSE : NORMAL_PAUSE;
+      
+      await new Promise(resolve => setTimeout(resolve, pauseDuration));
+    }
+    
+    // Finalna pauza przed pokazaniem wyniku
+    await new Promise(resolve => setTimeout(resolve, FINAL_PAUSE));
+  };
+
   const handlePlay = async () => {
     if (selectedNumbers.length !== numberOfPicks) {
       alert(`⚠️ Select exactly ${numberOfPicks} number${numberOfPicks === 1 ? '' : 's'}!`);
@@ -201,19 +240,19 @@ export default function KenoGame({
 
     setIsPlaying(true);
     setLastResult(null);
-    setAnimatingNumbers([]);
+    setRevealedNumbers([]);
+    setCurrentlyDrawing(null);
 
     try {
       if (isDev) {
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 300));
         const drawnNumbers: number[] = [];
         while (drawnNumbers.length < 10) {
           const n = Math.floor(Math.random() * 40) + 1;
           if (!drawnNumbers.includes(n)) drawnNumbers.push(n);
         }
         
-        setAnimatingNumbers(drawnNumbers);
-        await new Promise(r => setTimeout(r, 2000));
+        await animateDrawnNumbers(drawnNumbers);
         
         const matches = selectedNumbers.filter(n => drawnNumbers.includes(n)).length;
         const payoutTable = PAYOUT_TABLES[riskLevel][numberOfPicks];
@@ -244,10 +283,8 @@ export default function KenoGame({
       const data = await response.json();
 
       if (data.success) {
-        setAnimatingNumbers(data.result.drawnNumbers);
-        await new Promise(r => setTimeout(r, 2000));
+        await animateDrawnNumbers(data.result.drawnNumbers);
         
-        // ✅ UPDATE POINTS FROM API RESPONSE
         setPoints(data.newBalance || 0);
         setLastResult({
           ...data.result,
@@ -263,7 +300,6 @@ export default function KenoGame({
       alert('Network error');
     } finally {
       setIsPlaying(false);
-      setAnimatingNumbers([]);
     }
   };
 
@@ -296,7 +332,7 @@ export default function KenoGame({
           </div>
         </div>
 
-        {/* Compact Settings */}
+        {/* Settings */}
         <div className="glass-card p-3">
           <div className="grid grid-cols-2 gap-2 mb-2">
             <div>
@@ -367,96 +403,200 @@ export default function KenoGame({
           </div>
         </div>
 
-        {/* Keno Board */}
-        <div className="glass-card p-3 relative">
-          {lastResult && (
-            <div 
-              className="absolute inset-0 z-10 flex items-center justify-center bg-black/90 backdrop-blur-sm rounded-lg animate-fade-in cursor-pointer"
-              onClick={() => setLastResult(null)}
-            >
-              <div 
-                className={`p-6 rounded-xl max-w-sm w-full mx-4 ${
-                  lastResult.payout > 0 
-                    ? 'bg-gradient-to-br from-green-600 to-green-800 shadow-2xl shadow-green-500/50' 
-                    : 'bg-gradient-to-br from-red-600 to-red-800 shadow-2xl shadow-red-500/50'
-                }`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="text-center">
-                  <div className="text-6xl mb-3">
-                    {lastResult.payout > 0 ? '🎉' : '😢'}
-                  </div>
-                  <div className="text-3xl font-bold mb-4 text-white">
-                    {lastResult.payout > 0 ? 'WIN!' : 'Loss'}
-                  </div>
-                  <div className="space-y-2 text-base mb-4 text-white/90">
-                    <div className="flex justify-between items-center">
-                      <span>Matches:</span>
-                      <span className="font-bold text-xl">{lastResult.matches}/{lastResult.numberOfPicks || numberOfPicks}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Multiplier:</span>
-                      <span className="font-bold text-xl text-yellow-300">{lastResult.multiplier}x</span>
-                    </div>
-                  </div>
-                  <div className="border-t border-white/20 pt-3">
-                    <div className={`text-5xl font-bold ${lastResult.payout > 0 ? 'text-yellow-300' : 'text-red-200'}`}>
-                      {lastResult.payout > 0 ? '+' : ''}{lastResult.payout.toFixed(0)}
-                    </div>
-                    <div className="text-sm text-white/70 mt-1">points</div>
-                  </div>
-                  <div className="mt-4 text-xs text-white/50 animate-pulse">
-                    Auto-closes in 3s or tap anywhere
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Grid */}
-          <div className="grid grid-cols-8 gap-1.5 mb-3">
-            {Array.from({ length: 40 }, (_, i) => i + 1).map(num => {
-              const isSelected = selectedNumbers.includes(num);
-              const isDrawn = animatingNumbers.includes(num) || lastResult?.drawnNumbers?.includes(num);
-              const isMatch = isSelected && isDrawn;
-              
-              return (
+        {/* Selected Numbers */}
+        {selectedNumbers.length > 0 && !isPlaying && (
+          <div className="glass-card p-3">
+            <div className="text-xs text-gray-400 mb-2">Your Numbers (click X to remove):</div>
+            <div className="flex flex-wrap gap-2">
+              {selectedNumbers.map(num => (
                 <button
                   key={num}
-                  onClick={() => toggleNumber(num)}
-                  disabled={isPlaying || (selectedNumbers.length >= numberOfPicks && !isSelected)}
-                  className={`
-                    aspect-square flex items-center justify-center rounded font-bold text-sm
-                    transition-all duration-200
-                    ${isMatch 
-                      ? 'bg-gradient-to-br from-green-400 to-green-600 text-white scale-110 ring-2 ring-green-300' 
-                      : isSelected
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black scale-105'
-                      : isDrawn
-                      ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white ring-1 ring-blue-300'
-                      : 'bg-gray-700 hover:bg-gray-600'}
-                    ${isPlaying || (selectedNumbers.length >= numberOfPicks && !isSelected)
-                      ? 'cursor-not-allowed opacity-50' 
-                      : 'cursor-pointer active:scale-95'}
-                    ${animatingNumbers.includes(num) ? 'animate-pulse' : ''}
-                  `}
+                  onClick={() => deselectNumber(num)}
+                  className="group relative w-10 h-10 flex items-center justify-center rounded-lg font-bold text-sm bg-gradient-to-br from-yellow-400 to-yellow-600 text-black hover:opacity-80 transition-all"
                 >
                   {num}
-                </button>
-              );
-            })}
-          </div>
-
-          {animatingNumbers.length > 0 && (
-            <div className="p-2 bg-gray-800 rounded">
-              <div className="text-xs text-gray-400 mb-1">Drawn Numbers:</div>
-              <div className="flex flex-wrap gap-1">
-                {animatingNumbers.map((num: number) => (
-                  <span key={num} className="w-8 h-8 flex items-center justify-center rounded-full font-bold text-xs bg-blue-600">
-                    {num}
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                    ×
                   </span>
-                ))}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Keno Board */}
+        <div className="glass-card p-3 relative">
+          {/* ✅ NOWY: Overlay u góry, nie zasłania planszy */}
+{/* ✅ WYCENTROWANY OVERLAY - w środku, kompaktowy */}
+{lastResult && (
+  <div 
+    className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg cursor-pointer"
+    onClick={() => setLastResult(null)}
+  >
+    <div 
+className={`p-6 rounded-xl max-w-md w-full mx-4 backdrop-blur-sm border-2 shadow-2xl ${
+  lastResult.payout > 0 
+    ? 'bg-green-900/30 border-green-500/40' 
+    : 'bg-gray-900/30 border-gray-600/40'
+}`}
+
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Emoji i Status */}
+      <div className="text-center mb-4">
+        <div className="text-6xl mb-2">
+          {lastResult.payout > 0 ? '🎉' : '😢'}
+        </div>
+        <div className="text-3xl font-bold text-white mb-1">
+          {lastResult.payout > 0 ? 'WIN!' : 'Loss'}
+        </div>
+      </div>
+      
+      {/* Stats */}
+      <div className="space-y-3 mb-4">
+        <div className="flex justify-between items-center text-base text-white/90">
+          <span>Matches:</span>
+          <span className="font-bold text-xl">
+            {lastResult.matches}/{lastResult.numberOfPicks || numberOfPicks}
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-base text-white/90">
+          <span>Multiplier:</span>
+          <span className="font-bold text-xl text-yellow-300">
+            {lastResult.multiplier}x
+          </span>
+        </div>
+      </div>
+      
+      {/* Payout */}
+      <div className="border-t border-white/20 pt-4 mb-4">
+        <div className="text-center">
+          <div className={`text-5xl font-bold ${
+            lastResult.payout > 0 ? 'text-green-300' : 'text-gray-300'
+          }`}>
+            {lastResult.payout > 0 ? '+' : ''}{lastResult.payout.toFixed(0)}
+          </div>
+          <div className="text-sm text-white/60 mt-1">points</div>
+        </div>
+      </div>
+      
+      {/* Close button */}
+      <button 
+        onClick={() => setLastResult(null)}
+        className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-semibold transition-all"
+      >
+        Continue
+      </button>
+      
+      <div className="mt-2 text-xs text-white/40 text-center animate-pulse">
+        or click anywhere to dismiss
+      </div>
+    </div>
+  </div>
+)}
+
+
+          {/* ✅ POPRAWIONE KOLORY - stonowane */}
+{/* ✅ POPRAWIONE KOLORY - wylosowane liczby bardziej widoczne */}
+<div className="grid grid-cols-8 gap-1.5 mb-3">
+  {Array.from({ length: 40 }, (_, i) => i + 1).map(num => {
+    const isSelected = selectedNumbers.includes(num);
+    const isRevealed = revealedNumbers.includes(num);
+    const isCurrentlyDrawing = currentlyDrawing === num;
+    const isMatch = isSelected && isRevealed;
+    
+    return (
+      <button
+        key={num}
+        onClick={() => toggleNumber(num)}
+        disabled={isPlaying || (selectedNumbers.length >= numberOfPicks && !isSelected)}
+        className={`
+          aspect-square flex items-center justify-center rounded-lg font-bold text-sm
+          transition-all duration-200 relative overflow-hidden
+          ${isMatch 
+            ? 'bg-gradient-to-br from-green-500 to-green-700 text-white scale-110 ring-2 ring-green-400 shadow-lg shadow-green-500/50 animate-pulse-glow' 
+            : isCurrentlyDrawing
+            ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white scale-105 ring-2 ring-orange-400 shadow-lg'
+            : isSelected
+            ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white scale-105 ring-1 ring-amber-500'
+            : isRevealed
+            ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white ring-2 ring-blue-300 shadow-md'
+            : 'bg-gray-700 hover:bg-gray-600 text-gray-300 active:scale-95'}
+          ${isPlaying || (selectedNumbers.length >= numberOfPicks && !isSelected)
+            ? 'cursor-not-allowed opacity-50' 
+            : 'cursor-pointer'}
+        `}
+      >
+        {num}
+        {isMatch && (
+          <span className="absolute inset-0 rounded-lg bg-green-400/20 blur-md animate-pulse"></span>
+        )}
+      </button>
+    );
+  })}
+</div>
+
+
+          {/* ✅ STONOWANE KOLORY - Live Drawing */}
+          {(revealedNumbers.length > 0 || isPlaying) && (
+            <div className="p-3 bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-lg border border-gray-600/30 shadow-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+                  🎲 Drawing... 
+                  <span className="text-amber-400 font-mono text-base">
+                    {revealedNumbers.length}/10
+                  </span>
+                </span>
+                {isPlaying && (
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                  </div>
+                )}
               </div>
+              
+              <div className="w-full h-1 bg-gray-700 rounded-full mb-3 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-slate-500 to-slate-600 transition-all duration-300 rounded-full"
+                  style={{ width: `${(revealedNumbers.length / 10) * 100}%` }}
+                ></div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {revealedNumbers.map((num, index) => {
+                  const isMatch = selectedNumbers.includes(num);
+                  const isLast = index === revealedNumbers.length - 1;
+                  return (
+                    <div
+                      key={`${num}-${index}`}
+                      className={`
+                        w-12 h-12 flex items-center justify-center rounded-full font-bold text-sm relative
+                        ${isMatch 
+                          ? 'bg-gradient-to-br from-green-500 to-green-700 ring-2 ring-green-400 shadow-lg shadow-green-500/50' 
+                          : 'bg-gradient-to-br from-slate-600 to-slate-700'}
+                        text-white
+                        ${isLast ? 'animate-bounce' : 'animate-scale-in'}
+                      `}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      {num}
+                      {isMatch && (
+                        <span className="absolute -top-1 -right-1 text-lg animate-bounce">✓</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {isPlaying && revealedNumbers.length > 0 && (
+                <div className="mt-3 text-center">
+                  <span className="text-xs text-gray-400">Current Matches: </span>
+                  <span className="text-lg font-bold text-green-400">
+                    {selectedNumbers.filter(n => revealedNumbers.includes(n)).length}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
