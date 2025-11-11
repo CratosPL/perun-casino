@@ -3,10 +3,11 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { fid: string } }
+  { params }: { params: Promise<{ fid: string }> }  // ✅ Promise!
 ) {
   try {
-    const fid = parseInt(params.fid);
+    const { fid: fidString } = await params;  // ✅ Await params
+    const fid = parseInt(fidString);
     console.log('📡 [API] GET /api/user - FID:', fid);
 
     if (isNaN(fid)) {
