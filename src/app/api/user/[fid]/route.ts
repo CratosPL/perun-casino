@@ -3,10 +3,10 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ fid: string }> }  // ✅ Promise!
+  { params }: { params: Promise<{ fid: string }> }
 ) {
   try {
-    const { fid: fidString } = await params;  // ✅ Await params
+    const { fid: fidString } = await params;
     const fid = parseInt(fidString);
     console.log('📡 [API] GET /api/user - FID:', fid);
 
@@ -14,9 +14,9 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid FID' }, { status: 400 });
     }
 
-    // Fetch user from Supabase
+    // ✅ ZMIEŃ NA user_points (lub sprawdź nazwę tabeli)
     const { data, error } = await supabase
-      .from('users')
+      .from('user_points')  // ✅ ZMIENIONE
       .select('*')
       .eq('fid', fid)
       .single();
@@ -25,7 +25,6 @@ export async function GET(
 
     if (error) {
       console.error('❌ [API] Supabase error:', error);
-      // If user not found, return default points
       if (error.code === 'PGRST116') {
         console.log('🆕 [API] User not found, returning defaults');
         return NextResponse.json({
