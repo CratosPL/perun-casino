@@ -6,11 +6,12 @@ import {
   generateVerificationUrl
 } from '@/lib/provably-fair'
 
-type RiskLevel = 'Klasyczne' | 'Niskie' | 'Średnie' | 'Wysokie';
+// ✅ ZMIEŃ NA ANGIELSKIE (jak w frontendzie)
+type RiskLevel = 'Classic' | 'Low' | 'Medium' | 'High';
 
-// ✅ DOKŁADNE PAYOUTS zgodnie ze specyfikacją
+// ✅ DOKŁADNE PAYOUTS z angielskimi kluczami
 const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> = {
-  Klasyczne: {
+  Classic: {
     1: { 0: 0, 1: 3.96 },
     2: { 0: 0, 1: 1.90, 2: 4.50 },
     3: { 0: 0, 1: 1, 2: 3.10, 3: 10.4 },
@@ -22,7 +23,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 0, 3: 1.55, 4: 3, 5: 8, 6: 15, 7: 44, 8: 60, 9: 85 },
     10: { 0: 0, 1: 0, 2: 0, 3: 1.40, 4: 2.25, 5: 4.50, 6: 8, 7: 17, 8: 50, 9: 80, 10: 100 }
   },
-  Niskie: {
+  Low: {
     1: { 0: 0.70, 1: 1.85 },
     2: { 0: 0, 1: 2, 2: 3.80 },
     3: { 0: 0, 1: 1.10, 2: 1.38, 3: 26 },
@@ -34,7 +35,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 1.10, 3: 1.30, 4: 1.70, 5: 2.50, 6: 7.50, 7: 50, 8: 250, 9: 1000 },
     10: { 0: 0, 1: 0, 2: 1.10, 3: 1.20, 4: 1.30, 5: 1.80, 6: 3.50, 7: 13, 8: 50, 9: 250, 10: 1000 }
   },
-  Średnie: {
+  Medium: {
     1: { 0: 0.40, 1: 2.75 },
     2: { 0: 0, 1: 2, 2: 5.10 },
     3: { 0: 0, 1: 0, 2: 2.80, 3: 50 },
@@ -46,7 +47,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 0, 3: 2, 4: 2.50, 5: 5, 6: 15, 7: 100, 8: 500, 9: 1000 },
     10: { 0: 0, 1: 0, 2: 0, 3: 1.60, 4: 2, 5: 4, 6: 7, 7: 26, 8: 100, 9: 500, 10: 1000 }
   },
-  Wysokie: {
+  High: {
     1: { 0: 0, 1: 3.96 },
     2: { 0: 0, 1: 0, 2: 17.1 },
     3: { 0: 0, 1: 0, 2: 0, 3: 81.5 },
@@ -63,7 +64,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { fid, gameType, betAmount, selectedNumbers, clientSeed, riskLevel = 'Klasyczne', numberOfPicks } = body
+    const { fid, gameType, betAmount, selectedNumbers, clientSeed, riskLevel = 'Classic', numberOfPicks } = body
     
     // Validation
     if (!fid || !betAmount || betAmount <= 0) {
@@ -140,11 +141,16 @@ export async function POST(req: NextRequest) {
     
     const matches = selectedNumbers.filter((n: number) => drawnNumbers.includes(n)).length
     
-    // ✅ Use risk level specific payouts
-    const payoutTable = PAYOUT_TABLES[riskLevel as RiskLevel] || PAYOUT_TABLES['Klasyczne'];
-    const multiplier = payoutTable[numberOfPicks]?.[matches] || 0
-    const payout = betAmount * multiplier
-    const newBalance = currentPoints - betAmount + payout
+    // ✅ POPRAWIONE: Sprawdź czy riskLevel jest poprawny
+    const validRiskLevels: RiskLevel[] = ['Classic', 'Low', 'Medium', 'High'];
+    const normalizedRiskLevel = validRiskLevels.includes(riskLevel as RiskLevel) 
+      ? (riskLevel as RiskLevel) 
+      : 'Classic';
+    
+    const payoutTable = PAYOUT_TABLES[normalizedRiskLevel];
+    const multiplier = payoutTable[numberOfPicks]?.[matches] || 0;
+    const payout = betAmount * multiplier;
+    const newBalance = currentPoints - betAmount + payout;
     
     // 3. Generate next server seed for next game
     const nextSeed = generateServerSeed()
@@ -186,7 +192,7 @@ export async function POST(req: NextRequest) {
           drawnNumbers,
           matches,
           multiplier,
-          riskLevel,
+          riskLevel: normalizedRiskLevel,
           numberOfPicks
         },
         client_seed: clientSeed,
