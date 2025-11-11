@@ -6,11 +6,9 @@ import { RootLayoutClient } from "./layout-client";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  // ✅ Basic metadata
   title: "⚡ Thunder Casino | God of Thunder Games",
   description: "Play provably fair arcade games with points. Compete on leaderboards, claim daily bonuses, and have fun. Free to play.",
   
-  // ✅ Open Graph (Farcaster, Discord, Facebook)
   openGraph: {
     type: 'website',
     url: 'https://perun-casino.vercel.app',
@@ -19,7 +17,7 @@ export const metadata: Metadata = {
     description: 'God of Thunder Games - Play provably fair arcade games with points.',
     images: [
       {
-        url: 'https://perun-casino.vercel.app/og-image.png', // ✅ MUST EXIST!
+        url: 'https://perun-casino.vercel.app/api/og', // ✅ ZMIENIONE Z /og-image.png
         width: 1200,
         height: 630,
         alt: 'Thunder Casino - God of Thunder Games',
@@ -28,36 +26,34 @@ export const metadata: Metadata = {
     locale: 'en_US',
   },
   
-  // ✅ Twitter Card (optional but recommended)
   twitter: {
     card: 'summary_large_image',
     title: 'Thunder Casino',
     description: 'Play provably fair arcade games with points.',
-    images: ['https://perun-casino.vercel.app/og-image.png'],
-    creator: '@cratospl', // ✅ Twój Twitter (opcjonalnie)
+    images: ['https://perun-casino.vercel.app/api/og'], // ✅ ZMIENIONE Z /og-image.png
+    creator: '@cratospl',
   },
   
-  // ✅ Manifest
-  manifest: '/.well-known/farcaster.json',
+  // ✅ DODAJ FARCASTER FRAME TAGS:
+  other: {
+    'fc:frame': 'vNext',
+    'fc:frame:image': 'https://perun-casino.vercel.app/api/og',
+    'fc:frame:image:aspect_ratio': '1.91:1',
+    'og:image': 'https://perun-casino.vercel.app/api/og',
+  },
   
-  // ✅ Icons
+  manifest: '/.well-known/farcaster.json',
   icons: {
     icon: '/icon.png',
     apple: '/icon.png',
     shortcut: '/icon.png',
   },
-  
-  // ✅ Viewport
   viewport: {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
   },
-  
-  // ✅ Theme color
   themeColor: '#0A0E27',
-  
-  // ✅ Keywords (for SEO)
   keywords: ['casino', 'arcade', 'games', 'provably fair', 'free', 'points', 'leaderboard', 'farcaster'],
 };
 
