@@ -32,6 +32,7 @@ export async function GET() {
           fontWeight: 'bold', 
           background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
           backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',  // ✅ Dodaj to dla Safari
           color: 'transparent',
           marginBottom: 20,
         }}>
@@ -62,7 +63,7 @@ export async function GET() {
     ),
     {
       width: 1200,
-      height: 630,
+      height: 800,  // ✅ ZMIENIONE z 630 na 800
     }
   );
 }
