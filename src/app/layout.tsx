@@ -34,13 +34,6 @@ export const metadata: Metadata = {
     creator: '@cratospl',
   },
   
-  other: {
-    'fc:frame': 'vNext',
-    'fc:frame:image': 'https://perun-casino.vercel.app/api/og',
-    'fc:frame:image:aspect_ratio': '1.91:1',
-    'og:image': 'https://perun-casino.vercel.app/api/og',
-  },
-  
   manifest: '/.well-known/farcaster.json',
   icons: {
     icon: '/icon.png',
@@ -61,28 +54,46 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const miniappEmbed = {
+    version: "1",
+    imageUrl: "https://perun-casino.vercel.app/api/og",
+    button: {
+      title: "⚡ Play Thunder Casino",
+      action: {
+        type: "launch_miniapp",
+        name: "Thunder Casino",
+        url: "https://perun-casino.vercel.app",
+        splashImageUrl: "https://perun-casino.vercel.app/icon.png",
+        splashBackgroundColor: "#0A0E27"
+      }
+    }
+  };
+
+  const frameEmbed = {
+    ...miniappEmbed,
+    button: {
+      ...miniappEmbed.button,
+      action: {
+        ...miniappEmbed.button.action,
+        type: "launch_frame"
+      }
+    }
+  };
+
   return (
     <html lang="en">
       <head>
-        {/* ✅ Explicit Farcaster Frame Tags */}
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content="https://perun-casino.vercel.app/api/og" />
-        <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
+        <meta name="fc:miniapp" content={JSON.stringify(miniappEmbed)} />
+        <meta name="fc:frame" content={JSON.stringify(frameEmbed)} />
         
-        {/* ✅ Explicit Open Graph */}
         <meta property="og:title" content="Thunder Casino" />
         <meta property="og:description" content="God of Thunder Games - Play provably fair arcade games" />
         <meta property="og:image" content="https://perun-casino.vercel.app/api/og" />
         <meta property="og:url" content="https://perun-casino.vercel.app" />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Thunder Casino" />
         
-        {/* ✅ Explicit Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Thunder Casino" />
-        <meta name="twitter:description" content="Play provably fair arcade games with points" />
         <meta name="twitter:image" content="https://perun-casino.vercel.app/api/og" />
-        <meta name="twitter:creator" content="@cratospl" />
       </head>
       <body className={inter.className}>
         <RootLayoutClient>
