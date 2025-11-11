@@ -93,6 +93,7 @@ export default function KenoGame({
     if (onPointsChange) onPointsChange(points);
   }, [points, onPointsChange]);
 
+  // ✅ FIXED: Fetch real points from API
   useEffect(() => {
     const init = async () => {
       try {
@@ -101,6 +102,17 @@ export default function KenoGame({
         if (context?.user?.fid) {
           setFid(context.user.fid);
           setIsDev(false);
+          
+          // ✅ FETCH REAL POINTS FROM API
+          try {
+            const res = await fetch(`/api/user/${context.user.fid}`);
+            if (res.ok) {
+              const data = await res.json();
+              setPoints(data.points || 2500);
+            }
+          } catch (error) {
+            console.error('Failed to fetch points:', error);
+          }
         } else throw new Error('No Farcaster user context');
       } catch {
         setIsDev(true);
@@ -235,6 +247,7 @@ export default function KenoGame({
         setAnimatingNumbers(data.result.drawnNumbers);
         await new Promise(r => setTimeout(r, 2000));
         
+        // ✅ UPDATE POINTS FROM API RESPONSE
         setPoints(data.newBalance || 0);
         setLastResult({
           ...data.result,
@@ -243,13 +256,6 @@ export default function KenoGame({
         if (data.provablyFair?.nextServerSeedHash) {
           setServerSeedHash(data.provablyFair.nextServerSeedHash);
         }
-
-        // ❌ USUNIĘTE AUTO-SHARE:
-        // if (data.result.payout > betAmount * 10) {
-        //   sdk.actions.openUrl(
-        //     `https://warpcast.com/~/compose?text=I won ${data.result.payout.toFixed(2)} points in Thunder Keno! 🎰⚡`
-        //   );
-        // }
       } else {
         alert(data.error || 'Game error');
       }

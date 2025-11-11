@@ -20,8 +20,6 @@ export default function Home() {
         if (context?.user?.fid) {
           setFid(context.user.fid);
           setIsDev(false);
-          
-          // Fetch user data (streak and balance)
           fetchUserData(context.user.fid);
         }
       } catch (error) {
@@ -48,102 +46,103 @@ export default function Home() {
 
   const handleBonusClaimed = (bonus: number, newBalance: number) => {
     setUserBalance(newBalance);
-    fetchUserData(fid); // Refresh streak
+    fetchUserData(fid);
   };
 
   return (
     <>
       <Navbar />
+      {/* ✅ FIXED: Responsive padding + safe area */}
       <main className="min-h-screen flex flex-col items-center justify-center relative z-10">
-        <div className="container mx-auto px-6 py-32">
+        <div className="container mx-auto px-4 pt-24 pb-16 md:px-6 md:pt-32 md:pb-32">
           
           {/* Hero Section */}
-          <div className="max-w-5xl mx-auto text-center space-y-12">
+          <div className="max-w-5xl mx-auto text-center space-y-8 md:space-y-12">
             
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 glass-card px-5 py-3">
+            <div className="inline-flex items-center gap-2 glass-card px-4 py-2 md:px-5 md:py-3">
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-lightning-primary)' }}></span>
-              <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              <span className="text-xs md:text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
                 Play for Free • Points-Based Gaming
                 {isDev && <span className="ml-2 text-yellow-400">(Dev Mode)</span>}
               </span>
             </div>
 
             {/* Main heading */}
-            <div className="space-y-6 relative">
-              <div className="absolute -left-20 top-0 text-6xl opacity-20 thunder-icon">⚡</div>
-              <div className="absolute -right-20 top-0 text-6xl opacity-20 thunder-icon" style={{ animationDelay: '1.5s' }}>⚡</div>
+            <div className="space-y-4 md:space-y-6 relative">
+              <div className="hidden md:block absolute -left-20 top-0 text-6xl opacity-20 thunder-icon">⚡</div>
+              <div className="hidden md:block absolute -right-20 top-0 text-6xl opacity-20 thunder-icon" style={{ animationDelay: '1.5s' }}>⚡</div>
               
-              <h1 className="text-7xl md:text-8xl font-bold tracking-tight leading-[0.9]">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
                 <span className="thunder-gradient">Thunder</span>
                 <br />
                 <span style={{ color: 'var(--color-text-primary)' }}>Casino</span>
               </h1>
-              <p className="text-2xl font-semibold thunder-gradient">
+              <p className="text-xl md:text-2xl font-semibold thunder-gradient">
                 Arcade Games • Pure Fun
               </p>
             </div>
 
             {/* Description */}
-            <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed px-2" style={{ color: 'var(--color-text-secondary)' }}>
               Play provably fair arcade games with points. Compete on leaderboards, 
               earn daily bonuses, and challenge your friends. No crypto required.
             </p>
 
-            {/* Quick Stats - UPDATED */}
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto py-8">
-              <div className="glass-card p-6">
-                <div className="text-3xl font-bold thunder-gradient">2,500</div>
-                <div className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-2xl mx-auto py-6 md:py-8">
+              <div className="glass-card p-4 md:p-6">
+                <div className="text-2xl md:text-3xl font-bold thunder-gradient">2,500</div>
+                <div className="text-xs md:text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Starting Points
                 </div>
               </div>
-              <div className="glass-card p-6">
-                <div className="text-3xl font-bold thunder-gradient">∞</div>
-                <div className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+              <div className="glass-card p-4 md:p-6">
+                <div className="text-2xl md:text-3xl font-bold thunder-gradient">∞</div>
+                <div className="text-xs md:text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Free to Play
                 </div>
               </div>
-              <div className="glass-card p-6">
-                <div className="text-3xl font-bold thunder-gradient">100%</div>
-                <div className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+              <div className="glass-card p-4 md:p-6">
+                <div className="text-2xl md:text-3xl font-bold thunder-gradient">100%</div>
+                <div className="text-xs md:text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Provably Fair
                 </div>
               </div>
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
-              <div className="glass-card p-8 text-center space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 pt-8 md:pt-12">
+              <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                 <div className="feature-icon mx-auto">🎲</div>
-                <h3 className="text-xl font-semibold">Provably Fair</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Provably Fair</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   Every game result is cryptographically verifiable on-chain. 
                   Transparent and honest gaming.
                 </p>
               </div>
 
-              <div className="glass-card p-8 text-center space-y-4">
+              <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                 <div className="feature-icon mx-auto">🏆</div>
-                <h3 className="text-xl font-semibold">Compete & Win</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Compete & Win</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   Climb the leaderboards. Challenge friends. 
                   Daily bonuses and special events.
                 </p>
               </div>
 
-              <div className="glass-card p-8 text-center space-y-4">
+              <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                 <div className="feature-icon mx-auto">⚡</div>
-                <h3 className="text-xl font-semibold">Instant Play</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Instant Play</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   No downloads, no waiting. Connect with Farcaster and start playing immediately.
                 </p>
               </div>
             </div>
 
-            {/* Daily Bonus Section - UPDATED */}
-            <div className="pt-32 space-y-8">
-              <h2 className="text-4xl font-bold thunder-gradient">Daily Rewards</h2>
+            {/* Daily Bonus Section */}
+            <div className="pt-16 md:pt-32 space-y-6 md:space-y-8">
+              <h2 className="text-3xl md:text-4xl font-bold thunder-gradient">Daily Rewards</h2>
               <div className="max-w-2xl mx-auto">
                 <DailyBonus 
                   fid={fid}
@@ -153,30 +152,30 @@ export default function Home() {
               </div>
             </div>
 
-            {/* How it Works - UPDATED */}
-            <div className="pt-32 space-y-12">
-              <h2 className="text-4xl font-bold thunder-gradient">How It Works</h2>
+            {/* How it Works */}
+            <div className="pt-16 md:pt-32 space-y-8 md:space-y-12">
+              <h2 className="text-3xl md:text-4xl font-bold thunder-gradient">How It Works</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div className="glass-card p-8 text-center space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+                <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                   <div className="step-badge mx-auto">1</div>
-                  <h3 className="text-xl font-semibold">Connect & Start</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Connect & Start</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                     Connect with your Farcaster account. Get <strong>2,500 free points</strong> to start playing immediately.
                   </p>
                 </div>
 
-                <div className="glass-card p-8 text-center space-y-4">
+                <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                   <div className="step-badge mx-auto">2</div>
-                  <h3 className="text-xl font-semibold">Play & Compete</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Play & Compete</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                     Choose your game. Place your bets. Watch the action unfold with provably fair results.
                   </p>
                 </div>
 
-                <div className="glass-card p-8 text-center space-y-4">
+                <div className="glass-card p-6 md:p-8 text-center space-y-3 md:space-y-4">
                   <div className="step-badge mx-auto">3</div>
-                  <h3 className="text-xl font-semibold">Earn & Share</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Earn & Share</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                     Claim daily bonuses, climb leaderboards, share your wins. Build your reputation!
                   </p>
@@ -185,23 +184,23 @@ export default function Home() {
             </div>
 
             {/* Provably Fair Explanation */}
-            <div className="pt-32 space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="text-4xl font-bold thunder-gradient">How Provably Fair Works</h2>
-                <p className="text-lg max-w-3xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
+            <div className="pt-16 md:pt-32 space-y-8 md:space-y-12">
+              <div className="text-center space-y-3 md:space-y-4">
+                <h2 className="text-3xl md:text-4xl font-bold thunder-gradient">How Provably Fair Works</h2>
+                <p className="text-base md:text-lg max-w-3xl mx-auto px-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Every game is mathematically verifiable. You can prove we can't cheat.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
                 
                 {/* Before You Play */}
-                <div className="glass-card p-6 space-y-4">
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">🔒</span>
-                    <h3 className="text-xl font-bold">Before You Play</h3>
+                    <span className="text-2xl md:text-3xl">🔒</span>
+                    <h3 className="text-lg md:text-xl font-bold">Before You Play</h3>
                   </div>
-                  <ol className="space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <ol className="space-y-2 md:space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     <li className="flex gap-3">
                       <span className="font-bold text-yellow-400 shrink-0">1.</span>
                       <span>Server generates a <strong>secret seed</strong> and shows you its <strong>hash</strong> (encrypted fingerprint)</span>
@@ -218,12 +217,12 @@ export default function Home() {
                 </div>
 
                 {/* After You Play */}
-                <div className="glass-card p-6 space-y-4">
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">✅</span>
-                    <h3 className="text-xl font-bold">After You Play</h3>
+                    <span className="text-2xl md:text-3xl">✅</span>
+                    <h3 className="text-lg md:text-xl font-bold">After You Play</h3>
                   </div>
-                  <ol className="space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <ol className="space-y-2 md:space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     <li className="flex gap-3">
                       <span className="font-bold text-green-400 shrink-0">4.</span>
                       <span>Server <strong>reveals</strong> its secret seed to you</span>
@@ -240,12 +239,12 @@ export default function Home() {
                 </div>
 
                 {/* The Math */}
-                <div className="glass-card p-6 space-y-4 md:col-span-2">
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4 md:col-span-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">🔬</span>
-                    <h3 className="text-xl font-bold">The Mathematics</h3>
+                    <span className="text-2xl md:text-3xl">🔬</span>
+                    <h3 className="text-lg md:text-xl font-bold">The Mathematics</h3>
                   </div>
-                  <div className="bg-gray-900 p-4 rounded-lg">
+                  <div className="bg-gray-900 p-3 md:p-4 rounded-lg overflow-x-auto">
                     <code className="text-xs text-green-400 break-all">
                       Result = SHA256(client_seed + server_seed + nonce)
                     </code>
@@ -254,7 +253,7 @@ export default function Home() {
                     This is <strong>cryptographically impossible</strong> to manipulate. If we changed the server seed after seeing your picks, 
                     the hash wouldn't match. It's the same technology that secures Bitcoin transactions.
                   </p>
-                  <div className="flex gap-4 text-xs flex-wrap">
+                  <div className="flex flex-col md:flex-row gap-3 md:gap-4 text-xs">
                     <div className="flex-1 min-w-[200px] p-3 bg-blue-900/20 rounded">
                       <div className="font-bold mb-1">🛡️ Immutable</div>
                       <div style={{ color: 'var(--color-text-secondary)' }}>Can't be changed after commitment</div>
@@ -272,29 +271,29 @@ export default function Home() {
               </div>
 
               {/* Real Example */}
-              <div className="max-w-3xl mx-auto glass-card p-6 bg-gradient-to-br from-gray-800 to-gray-900">
+              <div className="max-w-3xl mx-auto glass-card p-5 md:p-6 bg-gradient-to-br from-gray-800 to-gray-900">
                 <h4 className="font-bold mb-4 text-center">📖 Real Example</h4>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center gap-4">
+                <div className="space-y-3 text-sm overflow-x-auto">
+                  <div className="flex justify-between items-center gap-4 min-w-[300px]">
                     <span style={{ color: 'var(--color-text-secondary)' }}>Server Seed Hash (before):</span>
                     <code className="bg-gray-950 px-3 py-1 rounded text-xs text-blue-400">a3f4b2c1...</code>
                   </div>
-                  <div className="flex justify-between items-center gap-4">
+                  <div className="flex justify-between items-center gap-4 min-w-[300px]">
                     <span style={{ color: 'var(--color-text-secondary)' }}>Your Client Seed:</span>
                     <code className="bg-gray-950 px-3 py-1 rounded text-xs text-yellow-400">1731153600-abc</code>
                   </div>
-                  <div className="flex justify-between items-center gap-4">
+                  <div className="flex justify-between items-center gap-4 min-w-[300px]">
                     <span style={{ color: 'var(--color-text-secondary)' }}>Nonce:</span>
                     <code className="bg-gray-950 px-3 py-1 rounded text-xs">42</code>
                   </div>
                   <div className="border-t border-gray-700 pt-3 mt-3">
-                    <div className="flex justify-between items-center gap-4">
+                    <div className="flex justify-between items-center gap-4 min-w-[300px]">
                       <span style={{ color: 'var(--color-text-secondary)' }}>Result:</span>
                       <code className="bg-gray-950 px-3 py-1 rounded text-xs text-green-400">15, 23, 47, 58...</code>
                     </div>
                   </div>
                   <div className="border-t border-gray-700 pt-3 mt-3">
-                    <div className="flex justify-between items-center gap-4">
+                    <div className="flex justify-between items-center gap-4 min-w-[300px]">
                       <span style={{ color: 'var(--color-text-secondary)' }}>Revealed Server Seed (after):</span>
                       <code className="bg-gray-950 px-3 py-1 rounded text-xs text-purple-400">f7e8d9c0...</code>
                     </div>
@@ -306,32 +305,32 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Points & Rewards System - UPDATED */}
-            <div className="pt-32 space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="text-4xl font-bold thunder-gradient">Points & Rewards System</h2>
-                <p className="text-lg max-w-3xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
+            {/* Points & Rewards System */}
+            <div className="pt-16 md:pt-32 space-y-8 md:space-y-12">
+              <div className="text-center space-y-3 md:space-y-4">
+                <h2 className="text-3xl md:text-4xl font-bold thunder-gradient">Points & Rewards System</h2>
+                <p className="text-base md:text-lg max-w-3xl mx-auto px-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Understand how points work and maximize your rewards
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
                 
-                {/* Starting Points - UPDATED */}
-                <div className="glass-card p-6 space-y-4">
-                  <div className="text-4xl mb-2">🎁</div>
-                  <h3 className="text-xl font-bold">Starting Points</h3>
-                  <div className="text-3xl font-bold thunder-gradient">2,500</div>
+                {/* Starting Points */}
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4">
+                  <div className="text-3xl md:text-4xl mb-2">🎁</div>
+                  <h3 className="text-lg md:text-xl font-bold">Starting Points</h3>
+                  <div className="text-2xl md:text-3xl font-bold thunder-gradient">2,500</div>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     Every new player gets 2,500 free points to start. No purchase required, no wallet needed.
                   </p>
                 </div>
 
-                {/* Daily Bonus - UPDATED */}
-                <div className="glass-card p-6 space-y-4">
-                  <div className="text-4xl mb-2">📅</div>
-                  <h3 className="text-xl font-bold">Daily Bonus</h3>
-                  <div className="text-3xl font-bold thunder-gradient">100-300</div>
+                {/* Daily Bonus */}
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4">
+                  <div className="text-3xl md:text-4xl mb-2">📅</div>
+                  <h3 className="text-lg md:text-xl font-bold">Daily Bonus</h3>
+                  <div className="text-2xl md:text-3xl font-bold thunder-gradient">100-300</div>
                   <ul className="text-sm space-y-2" style={{ color: 'var(--color-text-secondary)' }}>
                     <li>• Base: <strong>100 points/day</strong></li>
                     <li>• Streak bonus: <strong>+20 per day</strong></li>
@@ -341,20 +340,20 @@ export default function Home() {
                   </ul>
                 </div>
 
-                {/* Balance Limits - NEW */}
-  <div className="glass-card p-6 space-y-4">
-    <div className="text-4xl mb-2">🚀</div>
-    <h3 className="text-xl font-bold">Unlimited Growth</h3>
-    <div className="text-3xl font-bold thunder-gradient">∞</div>
-    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-      No balance limits! Accumulate as many points as you can and dominate the leaderboard!
-    </p>
+                {/* Balance Limits */}
+                <div className="glass-card p-5 md:p-6 space-y-3 md:space-y-4">
+                  <div className="text-3xl md:text-4xl mb-2">🚀</div>
+                  <h3 className="text-lg md:text-xl font-bold">Unlimited Growth</h3>
+                  <div className="text-2xl md:text-3xl font-bold thunder-gradient">∞</div>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    No balance limits! Accumulate as many points as you can and dominate the leaderboard!
+                  </p>
                 </div>
               </div>
 
               {/* Fair Play Rules */}
-              <div className="max-w-3xl mx-auto glass-card p-6">
-                <h3 className="text-xl font-bold mb-4 text-center">⚖️ Fair Play Rules</h3>
+              <div className="max-w-3xl mx-auto glass-card p-5 md:p-6">
+                <h3 className="text-lg md:text-xl font-bold mb-4 text-center">⚖️ Fair Play Rules</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
                     <div className="text-green-400 font-semibold">✅ Allowed:</div>
@@ -378,16 +377,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* FAQ Section - UPDATED */}
-            <div className="pt-32 space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="text-4xl font-bold thunder-gradient">Frequently Asked Questions</h2>
+            {/* FAQ Section */}
+            <div className="pt-16 md:pt-32 space-y-8 md:space-y-12">
+              <div className="text-center space-y-3 md:space-y-4">
+                <h2 className="text-3xl md:text-4xl font-bold thunder-gradient">Frequently Asked Questions</h2>
               </div>
 
-              <div className="max-w-3xl mx-auto space-y-4">
+              <div className="max-w-3xl mx-auto space-y-3 md:space-y-4">
                 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>Is this real gambling?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -397,8 +396,8 @@ export default function Home() {
                   </p>
                 </details>
 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>Can I trust the results?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -409,8 +408,8 @@ export default function Home() {
                   </p>
                 </details>
 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>What happens if I run out of points?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -420,8 +419,8 @@ export default function Home() {
                   </p>
                 </details>
 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>Will points convert to tokens?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -432,8 +431,8 @@ export default function Home() {
                   </p>
                 </details>
 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>How do I verify a game result?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -452,8 +451,8 @@ export default function Home() {
                   </div>
                 </details>
 
-                <details className="glass-card p-6 cursor-pointer group">
-                  <summary className="font-bold text-lg list-none flex items-center justify-between">
+                <details className="glass-card p-5 md:p-6 cursor-pointer group">
+                  <summary className="font-bold text-base md:text-lg list-none flex items-center justify-between">
                     <span>Is my data safe?</span>
                     <span className="text-yellow-400 group-open:rotate-180 transition-transform">▼</span>
                   </summary>
@@ -467,8 +466,8 @@ export default function Home() {
             </div>
 
             {/* Future Vision */}
-            <div className="pt-32 space-y-8">
-              <div className="glass-card p-12 space-y-6">
+            <div className="pt-16 md:pt-32 space-y-6 md:space-y-8">
+              <div className="glass-card p-8 md:p-12 space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" 
                      style={{ background: 'rgba(255, 215, 0, 0.1)' }}>
                   <span className="text-sm font-semibold thunder-gradient">
@@ -476,32 +475,32 @@ export default function Home() {
                   </span>
                 </div>
                 
-                <h3 className="text-3xl font-bold">What's Next for Thunder Casino?</h3>
+                <h3 className="text-2xl md:text-3xl font-bold">What's Next for Thunder Casino?</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-left">
                   <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <div className="text-lg font-semibold mb-2">🎮 More Games</div>
+                    <div className="text-base md:text-lg font-semibold mb-2">🎮 More Games</div>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       Slots, dice, crash games, and more arcade classics coming soon.
                     </p>
                   </div>
                   
                   <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <div className="text-lg font-semibold mb-2">🏆 Tournaments</div>
+                    <div className="text-base md:text-lg font-semibold mb-2">🏆 Tournaments</div>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       Compete in weekly tournaments with real prizes and bragging rights.
                     </p>
                   </div>
                   
                   <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <div className="text-lg font-semibold mb-2">👥 Social Features</div>
+                    <div className="text-base md:text-lg font-semibold mb-2">👥 Social Features</div>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       Challenge friends, share wins, form teams. Gaming is better together.
                     </p>
                   </div>
                   
                   <div className="p-4 bg-gray-800/50 rounded-lg border-2 border-yellow-500/30">
-                    <div className="text-lg font-semibold mb-2">⚡ Token Bridge</div>
+                    <div className="text-base md:text-lg font-semibold mb-2">⚡ Token Bridge</div>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       <strong>Under research:</strong> Convert points to $THUNDER tokens on Base. 
                       <span className="block mt-2 text-xs text-yellow-400">

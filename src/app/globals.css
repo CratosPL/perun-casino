@@ -936,3 +936,10 @@ details[open] summary {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
+
+/* Safe area dla mobile */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: calc(4rem + env(safe-area-inset-top));
+  }
+}
