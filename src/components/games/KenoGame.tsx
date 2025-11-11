@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
-type RiskLevel = 'Klasyczne' | 'Niskie' | 'Średnie' | 'Wysokie';
+type RiskLevel = 'Classic' | 'Low' | 'Medium' | 'High';
 
 const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> = {
-  Klasyczne: {
+  Classic: {
     1: { 0: 0, 1: 3.96 },
     2: { 0: 0, 1: 1.90, 2: 4.50 },
     3: { 0: 0, 1: 1, 2: 3.10, 3: 10.4 },
@@ -17,7 +17,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 0, 3: 1.55, 4: 3, 5: 8, 6: 15, 7: 44, 8: 60, 9: 85 },
     10: { 0: 0, 1: 0, 2: 0, 3: 1.40, 4: 2.25, 5: 4.50, 6: 8, 7: 17, 8: 50, 9: 80, 10: 100 }
   },
-  Niskie: {
+  Low: {
     1: { 0: 0.70, 1: 1.85 },
     2: { 0: 0, 1: 2, 2: 3.80 },
     3: { 0: 0, 1: 1.10, 2: 1.38, 3: 26 },
@@ -29,7 +29,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 1.10, 3: 1.30, 4: 1.70, 5: 2.50, 6: 7.50, 7: 50, 8: 250, 9: 1000 },
     10: { 0: 0, 1: 0, 2: 1.10, 3: 1.20, 4: 1.30, 5: 1.80, 6: 3.50, 7: 13, 8: 50, 9: 250, 10: 1000 }
   },
-  Średnie: {
+  Medium: {
     1: { 0: 0.40, 1: 2.75 },
     2: { 0: 0, 1: 2, 2: 5.10 },
     3: { 0: 0, 1: 0, 2: 2.80, 3: 50 },
@@ -41,7 +41,7 @@ const PAYOUT_TABLES: Record<RiskLevel, Record<number, Record<number, number>>> =
     9: { 0: 0, 1: 0, 2: 0, 3: 2, 4: 2.50, 5: 5, 6: 15, 7: 100, 8: 500, 9: 1000 },
     10: { 0: 0, 1: 0, 2: 0, 3: 1.60, 4: 2, 5: 4, 6: 7, 7: 26, 8: 100, 9: 500, 10: 1000 }
   },
-  Wysokie: {
+  High: {
     1: { 0: 0, 1: 3.96 },
     2: { 0: 0, 1: 0, 2: 17.1 },
     3: { 0: 0, 1: 0, 2: 0, 3: 81.5 },
@@ -79,7 +79,7 @@ export default function KenoGame({
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [numberOfPicks, setNumberOfPicks] = useState<number>(1);
   const [betAmount, setBetAmount] = useState(10);
-  const [riskLevel, setRiskLevel] = useState<RiskLevel>('Klasyczne');
+  const [riskLevel, setRiskLevel] = useState<RiskLevel>('Classic');
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
   const [isDev, setIsDev] = useState(false);
@@ -121,7 +121,6 @@ export default function KenoGame({
     }
   }, [points, isDev, loading]);
 
-  // ✅ AUTO-DISMISS overlay po 3 sekundach
   useEffect(() => {
     if (lastResult && !isPlaying) {
       const timer = setTimeout(() => {
@@ -176,15 +175,15 @@ export default function KenoGame({
 
   const handlePlay = async () => {
     if (selectedNumbers.length !== numberOfPicks) {
-      alert(`⚠️ Wybierz dokładnie ${numberOfPicks} ${numberOfPicks === 1 ? 'liczbę' : 'liczb'}!`);
+      alert(`⚠️ Select exactly ${numberOfPicks} number${numberOfPicks === 1 ? '' : 's'}!`);
       return;
     }
     if (betAmount <= 0) {
-      alert('⚠️ Stawka musi być większa niż 0!');
+      alert('⚠️ Bet must be greater than 0!');
       return;
     }
     if (betAmount > points) {
-      alert(`❌ Niewystarczająca ilość punktów!\n\nMasz: ${points} pkt\nStawka: ${betAmount} pkt`);
+      alert(`❌ Insufficient points!\n\nYou have: ${points} pts\nBet: ${betAmount} pts`);
       return;
     }
 
@@ -245,16 +244,17 @@ export default function KenoGame({
           setServerSeedHash(data.provablyFair.nextServerSeedHash);
         }
 
-        if (data.result.payout > betAmount * 10) {
-          sdk.actions.openUrl(
-            `https://warpcast.com/~/compose?text=Wygrałem ${data.result.payout.toFixed(2)} punktów w Perun Keno! 🎰⚡`
-          );
-        }
+        // ❌ USUNIĘTE AUTO-SHARE:
+        // if (data.result.payout > betAmount * 10) {
+        //   sdk.actions.openUrl(
+        //     `https://warpcast.com/~/compose?text=I won ${data.result.payout.toFixed(2)} points in Thunder Keno! 🎰⚡`
+        //   );
+        // }
       } else {
-        alert(data.error || 'Błąd gry');
+        alert(data.error || 'Game error');
       }
     } catch (error) {
-      alert('Błąd sieci');
+      alert('Network error');
     } finally {
       setIsPlaying(false);
       setAnimatingNumbers([]);
@@ -265,7 +265,7 @@ export default function KenoGame({
     return (
       <div className="text-center p-8">
         <div className="animate-spin text-4xl mb-4">⚡</div>
-        <div>Ładowanie...</div>
+        <div>Loading...</div>
       </div>
     );
   }
@@ -281,11 +281,11 @@ export default function KenoGame({
         <div className="glass-card p-4">
           <div className="text-center">
             <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              ⚡ Perun Keno
+              <span className="thunder-gradient">⚡ Thunder Keno</span>
               {isDev && <span className="text-xs ml-2 text-yellow-400">(Dev)</span>}
             </h1>
             <div className="text-xl font-mono">
-              Punkty: <span className="text-yellow-400 font-bold">{points.toFixed(2)}</span>
+              Points: <span className="text-yellow-400 font-bold">{points.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -294,7 +294,7 @@ export default function KenoGame({
         <div className="glass-card p-3">
           <div className="grid grid-cols-2 gap-2 mb-2">
             <div>
-              <label className="block text-xs font-semibold mb-1">Ile liczb:</label>
+              <label className="block text-xs font-semibold mb-1">Pick Numbers:</label>
               <div className="flex gap-1 flex-wrap">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                   <button
@@ -312,9 +312,9 @@ export default function KenoGame({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">Ryzyko:</label>
+              <label className="block text-xs font-semibold mb-1">Risk:</label>
               <div className="grid grid-cols-2 gap-1">
-                {(['Klasyczne', 'Niskie', 'Średnie', 'Wysokie'] as RiskLevel[]).map(level => (
+                {(['Classic', 'Low', 'Medium', 'High'] as RiskLevel[]).map(level => (
                   <button
                     key={level}
                     onClick={() => setRiskLevel(level)}
@@ -331,7 +331,7 @@ export default function KenoGame({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold mb-1">Stawka:</label>
+            <label className="block text-xs font-semibold mb-1">Bet Amount:</label>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -356,14 +356,13 @@ export default function KenoGame({
           </div>
 
           <div className="mt-2 flex items-center justify-between text-xs bg-gray-800 rounded p-2">
-            <div>Wybrano: <span className="font-bold text-yellow-400">{selectedNumbers.length}/{numberOfPicks}</span></div>
-            <div>Max: <span className="font-bold text-yellow-400">{potentialWin.toFixed(0)} pkt</span></div>
+            <div>Selected: <span className="font-bold text-yellow-400">{selectedNumbers.length}/{numberOfPicks}</span></div>
+            <div>Max Win: <span className="font-bold text-yellow-400">{potentialWin.toFixed(0)} pts</span></div>
           </div>
         </div>
 
-        {/* ✅ Keno Board with AUTO-DISMISS Overlay */}
+        {/* Keno Board */}
         <div className="glass-card p-3 relative">
-          {/* ✅ Result Overlay - kliknij gdziekolwiek lub czekaj 3s */}
           {lastResult && (
             <div 
               className="absolute inset-0 z-10 flex items-center justify-center bg-black/90 backdrop-blur-sm rounded-lg animate-fade-in cursor-pointer"
@@ -382,15 +381,15 @@ export default function KenoGame({
                     {lastResult.payout > 0 ? '🎉' : '😢'}
                   </div>
                   <div className="text-3xl font-bold mb-4 text-white">
-                    {lastResult.payout > 0 ? 'WYGRANA!' : 'Przegrana'}
+                    {lastResult.payout > 0 ? 'WIN!' : 'Loss'}
                   </div>
                   <div className="space-y-2 text-base mb-4 text-white/90">
                     <div className="flex justify-between items-center">
-                      <span>Trafienia:</span>
+                      <span>Matches:</span>
                       <span className="font-bold text-xl">{lastResult.matches}/{lastResult.numberOfPicks || numberOfPicks}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>Mnożnik:</span>
+                      <span>Multiplier:</span>
                       <span className="font-bold text-xl text-yellow-300">{lastResult.multiplier}x</span>
                     </div>
                   </div>
@@ -398,18 +397,17 @@ export default function KenoGame({
                     <div className={`text-5xl font-bold ${lastResult.payout > 0 ? 'text-yellow-300' : 'text-red-200'}`}>
                       {lastResult.payout > 0 ? '+' : ''}{lastResult.payout.toFixed(0)}
                     </div>
-                    <div className="text-sm text-white/70 mt-1">punktów</div>
+                    <div className="text-sm text-white/70 mt-1">points</div>
                   </div>
-                  {/* ✅ Hint zamiast przycisku */}
                   <div className="mt-4 text-xs text-white/50 animate-pulse">
-                    Zamyka się za 3s lub kliknij gdziekolwiek
+                    Auto-closes in 3s or tap anywhere
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Keno Grid */}
+          {/* Grid */}
           <div className="grid grid-cols-8 gap-1.5 mb-3">
             {Array.from({ length: 40 }, (_, i) => i + 1).map(num => {
               const isSelected = selectedNumbers.includes(num);
@@ -443,10 +441,9 @@ export default function KenoGame({
             })}
           </div>
 
-          {/* Drawn numbers */}
           {animatingNumbers.length > 0 && (
             <div className="p-2 bg-gray-800 rounded">
-              <div className="text-xs text-gray-400 mb-1">Wylosowano:</div>
+              <div className="text-xs text-gray-400 mb-1">Drawn Numbers:</div>
               <div className="flex flex-wrap gap-1">
                 {animatingNumbers.map((num: number) => (
                   <span key={num} className="w-8 h-8 flex items-center justify-center rounded-full font-bold text-xs bg-blue-600">
@@ -465,7 +462,7 @@ export default function KenoGame({
             disabled={isPlaying || selectedNumbers.length !== numberOfPicks || betAmount > points}
             className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold text-lg rounded-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
           >
-            {isPlaying ? '🎲 Losowanie...' : `🎲 GRAJ (${betAmount} pkt)`}
+            {isPlaying ? '🎲 Drawing...' : `🎲 PLAY (${betAmount} pts)`}
           </button>
 
           <div className="grid grid-cols-2 gap-2">
@@ -474,14 +471,14 @@ export default function KenoGame({
               disabled={isPlaying}
               className="py-2 bg-blue-600 active:bg-blue-700 rounded font-semibold text-sm disabled:opacity-50 transition-all"
             >
-              ⚡ Auto-wybór
+              ⚡ Auto Pick
             </button>
             <button
               onClick={clearSelection}
               disabled={isPlaying}
               className="py-2 bg-red-600 active:bg-red-700 rounded font-semibold text-sm disabled:opacity-50 transition-all"
             >
-              🗑️ Wyczyść
+              🗑️ Clear
             </button>
           </div>
         </div>
@@ -495,9 +492,9 @@ export default function KenoGame({
             <div className="flex items-center gap-2">
               <span className="text-xl">📊</span>
               <div>
-                <h3 className="text-sm font-bold">Tabela Wypłat - {riskLevel}</h3>
+                <h3 className="text-sm font-bold">Payout Table - {riskLevel}</h3>
                 <p className="text-xs text-gray-400">
-                  {numberOfPicks} {numberOfPicks === 1 ? 'wybór' : 'wyborów'}
+                  {numberOfPicks} pick{numberOfPicks === 1 ? '' : 's'}
                   {currentPayoutTable && (
                     <span className="ml-2 text-yellow-400">
                       Max: {Math.max(...Object.values(currentPayoutTable))}x
@@ -535,7 +532,7 @@ export default function KenoGame({
                       <div className="flex items-center gap-2 flex-1">
                         <div>
                           <div className={`font-semibold ${isZero ? 'text-gray-500' : 'text-white'}`}>
-                            {matches} {Number(matches) === 1 ? 'traf.' : 'traf.'}
+                            {matches} hit{Number(matches) === 1 ? '' : 's'}
                           </div>
                           <div className="text-gray-500 text-xs">{probability}</div>
                         </div>
@@ -547,7 +544,7 @@ export default function KenoGame({
                         </div>
                         <div className="text-right min-w-[60px]">
                           <div className={`font-semibold ${isZero ? 'text-gray-600' : 'text-white'}`}>
-                            {winAmount} pkt
+                            {winAmount} pts
                           </div>
                         </div>
                       </div>
@@ -558,7 +555,7 @@ export default function KenoGame({
           )}
           
           <div className="mt-2 p-2 bg-gray-900/50 rounded text-xs text-gray-500 text-center">
-            💡 Zmień ryzyko aby zobaczyć różne wypłaty
+            💡 Change risk level to see different payouts
           </div>
         </div>
 
@@ -577,7 +574,7 @@ export default function KenoGame({
           {showProvablyFair && (
             <div className="mt-2 text-xs text-gray-400 space-y-1">
               {isDev ? (
-                <p>Dostępne w wersji produkcyjnej</p>
+                <p>Available in production version</p>
               ) : (
                 <>
                   <div>Client: <span className="text-yellow-400 font-mono text-xs">{clientSeed?.slice(0, 20)}...</span></div>
