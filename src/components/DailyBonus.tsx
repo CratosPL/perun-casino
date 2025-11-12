@@ -1,15 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react'; // ← dodany useEffect
+import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
+import { parseEther } from 'viem';
 
-import { useState } from 'react';
-
-function calculateDailyBonus(streak: number): number {
-  const baseBonus = 100;
-  const bonusPerDay = 20;
-  const maxBonus = 300;
-
-  const bonus = baseBonus + (streak - 1) * bonusPerDay;
-  return Math.min(bonus, maxBonus);
-}
+const PAYMENT_WALLET = '0xC950198D7fB2532BF9325Ef0d5bE82E5d555055C';
+const QUICK_CLAIM_AMOUNT = '0.00003';
 
 export default function DailyBonus({ 
   fid, 
@@ -23,11 +18,13 @@ export default function DailyBonus({
   const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+  
+  const { sendTransaction, data: txHash } = useSendTransaction();
+  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const handleClaim = async () => {
+  const handleFreeClaim = async () => {
     setClaiming(true);
-    setMessage('');
-
+    
     try {
       const res = await fetch('/api/daily-bonus', {
         method: 'POST',
@@ -38,17 +35,11 @@ export default function DailyBonus({
       const data = await res.json();
 
       if (data.success) {
-        const bonusAmount = data.bonus;
-        const newBalance = data.newBalance;
-        
-        setMessage(`🎁 Claimed ${bonusAmount} points! Streak: ${data.streak} days`);
+        setMessage(`🎁 Claimed ${data.bonus} points! Streak: ${data.streak} days`);
         setShowToast(true);
-        
         setTimeout(() => setShowToast(false), 3000);
         
-        if (onClaimed) {
-          onClaimed(bonusAmount, newBalance);
-        }
+        if (onClaimed) onClaimed(data.bonus, data.newBalance);
       } else {
         setMessage(`❌ ${data.error}`);
         setShowToast(true);
@@ -63,8 +54,46 @@ export default function DailyBonus({
     }
   };
 
-  // ✅ UŻYWAJ NOWEJ FUNKCJI zamiast prostego obliczenia
-  const estimatedBonus = streak > 0 ? calculateDailyBonus(streak) : 100;
+  const handleQuickClaim = async () => {
+    setClaiming(true);
+    
+    try {
+      sendTransaction({
+        to: PAYMENT_WALLET,
+        value: parseEther(QUICK_CLAIM_AMOUNT)
+      });
+    } catch (error) {
+      setMessage('❌ Payment failed');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setClaiming(false);
+    }
+  };
+
+  // ✅ POPRAWIONE: useEffect zamiast useState
+  useEffect(() => {
+    if (txConfirmed && txHash) {
+      (async () => {
+        const res = await fetch('/api/claim-paid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fid, txHash })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          setMessage(`⚡ Quick claim! +${data.bonus} points`);
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 3000);
+          
+          if (onClaimed) onClaimed(data.bonus, data.newBalance);
+        }
+        
+        setClaiming(false);
+      })();
+    }
+  }, [txConfirmed, txHash, fid, onClaimed]);
 
   return (
     <>
@@ -83,45 +112,45 @@ export default function DailyBonus({
         
         <div>
           <h3 className="text-2xl font-bold mb-2">Daily Bonus</h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Claim your free points every 24 hours
+          <p className="text-sm text-gray-400">
+            Choose your claim method
           </p>
         </div>
 
-        <div className="text-4xl font-bold thunder-gradient">
-          +{estimatedBonus} pts
+        <div className="border border-gray-600 rounded-lg p-4">
+          <div className="text-3xl font-bold text-yellow-400 mb-2">
+            +100 pts
+          </div>
+          <button
+            onClick={handleFreeClaim}
+            disabled={claiming}
+            className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg disabled:opacity-50 transition-all"
+          >
+            {claiming ? 'Claiming...' : 'Free Claim (24h cooldown)'}
+          </button>
+        </div>
+
+        <div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
+          <div className="text-3xl font-bold text-yellow-400 mb-2">
+            +200 pts ⚡
+          </div>
+          <button
+            onClick={handleQuickClaim}
+            disabled={claiming}
+            className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
+          >
+            {claiming ? 'Processing...' : `Quick Claim ($0.01)`}
+          </button>
+          <p className="text-xs text-gray-400 mt-2">
+            Instant, no cooldown
+          </p>
         </div>
 
         {streak > 0 && (
-          <div className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+          <div className="text-sm text-gray-400">
             🔥 Current streak: {streak} days
           </div>
         )}
-
-        {streak === 7 && (
-          <div className="text-sm font-semibold text-yellow-400 animate-pulse">
-            🎉 7-day streak bonus: +500 pts!
-          </div>
-        )}
-
-        {streak === 30 && (
-          <div className="text-sm font-semibold text-yellow-400 animate-pulse">
-            🏆 30-day streak mega bonus: +1500 pts!
-          </div>
-        )}
-
-        <button
-          onClick={handleClaim}
-          disabled={claiming}
-          className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold text-lg rounded-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          {claiming ? 'Claiming...' : 'Claim Now'}
-        </button>
-
-        <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          New players start with 2500 pts<br />
-          Base: 100 pts + Streak: {streak > 0 ? (streak - 1) * 20 : 0} pts (max 300 pts/day)
-        </div>
       </div>
     </>
   );
