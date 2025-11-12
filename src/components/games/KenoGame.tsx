@@ -88,27 +88,71 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
   const [currentlyDrawing, setCurrentlyDrawing] = useState<number | null>(null);
   const lastClickTime = useRef<number>(0);
 
-  // Audio references for sounds (WAV format)
+  // Detect iOS for audio handling
+  const isIOS = useRef(typeof window !== 'undefined' ? /iPad|iPhone|iPod/.test(navigator.userAgent) : false);
+
+  // Audio references for sounds (MP3 format for better iOS support)
   const drawSoundRef = useRef<HTMLAudioElement | null>(null);
   const winSoundRef = useRef<HTMLAudioElement | null>(null);
+  const audioUnlocked = useRef(false); // Track if audio is unlocked on iOS
 
   useEffect(() => {
     if (onPointsChange) onPointsChange(points);
   }, [points, onPointsChange]);
 
-  // Initialize audio elements on mount (WAV files)
+  // Function to unlock audio on iOS (call on first user interaction)
+  const unlockAudio = async () => {
+    if (!isIOS.current || audioUnlocked.current) return;
+
+    try {
+      // Create a short silent sound to unlock audio context
+      const silentAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjiQ1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+Dyvmwh');
+      silentAudio.volume = 0;
+      await silentAudio.play();
+      silentAudio.pause();
+      audioUnlocked.current = true;
+      console.log('Audio unlocked on iOS');
+    } catch (error) {
+      console.warn('Failed to unlock audio on iOS:', error);
+    }
+  };
+
+  // Initialize audio elements on mount (MP3 files)
   useEffect(() => {
-    if (drawSoundRef.current) {
-      drawSoundRef.current.src = '/sounds/draw_sound.wav';
-    } else {
-      drawSoundRef.current = new Audio('/sounds/draw_sound.wav');
-    }
-    
-    if (winSoundRef.current) {
-      winSoundRef.current.src = '/sounds/win_sound.wav';
-    } else {
-      winSoundRef.current = new Audio('/sounds/win_sound.wav');
-    }
+    const initAudio = (audioRef: React.MutableRefObject<HTMLAudioElement | null>, path: string, defaultVolume: number = 1) => {
+      if (audioRef.current) {
+        audioRef.current.src = path;
+      } else {
+        audioRef.current = new Audio(path);
+      }
+      const audio = audioRef.current;
+      if (audio) {
+        audio.preload = 'auto'; // Preload for faster playback
+        audio.volume = isIOS.current ? 0.5 : defaultVolume; // Lower volume on iOS to reduce distortion
+        if (isIOS.current) {
+          audio.muted = true; // Start muted on iOS to bypass autoplay
+        }
+        audio.load(); // Force load
+      }
+    };
+
+    initAudio(drawSoundRef, '/sounds/draw_sound.mp3', 0.7);
+    initAudio(winSoundRef, '/sounds/win_sound.mp3', 0.8);
+
+    // Listen for canplaythrough to ensure loaded
+    const onCanPlay = () => {
+      if (isIOS.current && !audioUnlocked.current) {
+        // Auto-unlock after load on iOS
+        unlockAudio();
+      }
+    };
+    drawSoundRef.current?.addEventListener('canplaythrough', onCanPlay);
+    winSoundRef.current?.addEventListener('canplaythrough', onCanPlay);
+
+    return () => {
+      drawSoundRef.current?.removeEventListener('canplaythrough', onCanPlay);
+      winSoundRef.current?.removeEventListener('canplaythrough', onCanPlay);
+    };
   }, []);
 
   useEffect(() => {
@@ -207,11 +251,37 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
     return betAmount * maxMultiplier;
   };
 
+  // Helper to play audio with iOS handling
+  const playAudioSafely = async (audioRef: React.MutableRefObject<HTMLAudioElement | null>, isWin = false): Promise<void> => {
+    const audio = audioRef.current;
+    if (!audio || !audio.src) return;
+
+    try {
+      if (isIOS.current && !audioUnlocked.current) {
+        await unlockAudio();
+        if (isIOS.current) audio.muted = false; // Unmute after unlock
+      }
+
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
+    } catch (error) {
+      if (isIOS.current) {
+        console.warn(`iOS audio play failed (${isWin ? 'win' : 'draw'}):`, error);
+      } else {
+        console.error(`Error playing ${isWin ? 'win' : 'draw'} sound:`, error);
+      }
+    }
+  };
+
   const animateDrawnNumbers = async (drawnNumbers: number[]) => {
     const FLASH_DURATION = 100;
     const NORMAL_PAUSE = 80;
     const HIT_PAUSE = 0;
     const FINAL_PAUSE = 300;
+    const DRAW_SOUND_INTERVAL = isIOS.current ? 2 : 1; // Play draw sound every N numbers on iOS to reduce overlap
     
     setRevealedNumbers([]);
     setCurrentlyDrawing(null);
@@ -221,12 +291,9 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
     for (let i = 0; i < drawnNumbers.length; i++) {
       const currentNum = drawnNumbers[i];
       
-      // Play draw sound at each number (WAV)
-      if (drawSoundRef.current) {
-        drawSoundRef.current.currentTime = 0;
-        drawSoundRef.current.play().catch((error) => {
-          console.error('Error playing draw sound:', error);
-        });
+      // Play draw sound (less frequent on iOS)
+      if (i % DRAW_SOUND_INTERVAL === 0 && drawSoundRef.current) {
+        await playAudioSafely(drawSoundRef);
       }
       
       setCurrentlyDrawing(currentNum);
@@ -246,6 +313,11 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
   };
 
   const handlePlay = async () => {
+    // Unlock audio on first play button tap (iOS)
+    if (isIOS.current && !audioUnlocked.current) {
+      await unlockAudio();
+    }
+
     if (selectedNumbers.length !== numberOfPicks) {
       alert(`⚠️ Select exactly ${numberOfPicks} number${numberOfPicks === 1 ? '' : 's'}!`);
       return;
@@ -284,12 +356,10 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
         setPoints(newPoints);
         setLastResult({ drawnNumbers, matches, multiplier, payout, numberOfPicks });
         
-        // Play win sound only if payout > 0 (WAV)
+        // Play win sound only if payout > 0
         if (payout > 0 && winSoundRef.current) {
-          winSoundRef.current.currentTime = 0;
-          winSoundRef.current.play().catch((error) => {
-            console.error('Error playing win sound:', error);
-          });
+          // Slight delay on iOS for smoother transition
+          setTimeout(() => playAudioSafely(winSoundRef, true), isIOS.current ? 200 : 0);
         }
 
         setIsPlaying(false);
@@ -321,12 +391,9 @@ export default function KenoGame({ onPointsChange }: { onPointsChange?: (points:
           provablyFair: data.provablyFair
         });
 
-        // Play win sound only if payout > 0 (WAV)
+        // Play win sound only if payout > 0
         if (data.result.payout > 0 && winSoundRef.current) {
-          winSoundRef.current.currentTime = 0;
-          winSoundRef.current.play().catch((error) => {
-            console.error('Error playing win sound:', error);
-          });
+          setTimeout(() => playAudioSafely(winSoundRef, true), isIOS.current ? 200 : 0);
         }
 
         if (data.provablyFair?.nextServerSeedHash) {
