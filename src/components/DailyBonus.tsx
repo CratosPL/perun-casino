@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react'; // ← dodany useEffect
+import { useState, useEffect } from 'react';
 import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 
 const PAYMENT_WALLET = '0xC950198D7fB2532BF9325Ef0d5bE82E5d555055C';
-const QUICK_CLAIM_AMOUNT = '0.000003';
+const QUICK_CLAIM_AMOUNT = '0.00001'; // ~$0.03
 
 export default function DailyBonus({ 
   fid, 
@@ -19,8 +19,10 @@ export default function DailyBonus({
   const [message, setMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   
-  const { sendTransaction, data: txHash } = useSendTransaction();
-  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+  const { sendTransaction, data: txHash, error: txError } = useSendTransaction();
+  const { isSuccess: txConfirmed, isError: txFailed } = useWaitForTransactionReceipt({ 
+    hash: txHash 
+  });
 
   const handleFreeClaim = async () => {
     setClaiming(true);
@@ -63,6 +65,7 @@ export default function DailyBonus({
         value: parseEther(QUICK_CLAIM_AMOUNT)
       });
     } catch (error) {
+      console.error('Payment error:', error);
       setMessage('❌ Payment failed');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -70,30 +73,52 @@ export default function DailyBonus({
     }
   };
 
-  // ✅ POPRAWIONE: useEffect zamiast useState
+  // Po potwierdzeniu transakcji
   useEffect(() => {
     if (txConfirmed && txHash) {
       (async () => {
-        const res = await fetch('/api/claim-paid', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fid, txHash })
-        });
+        try {
+          const res = await fetch('/api/claim-paid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fid, txHash })
+          });
 
-        const data = await res.json();
+          const data = await res.json();
 
-        if (data.success) {
-          setMessage(`⚡ Quick claim! +${data.bonus} points`);
+          if (data.success) {
+            setMessage(`⚡ Quick claim! +${data.bonus} points`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+            
+            if (onClaimed) onClaimed(data.bonus, data.newBalance);
+          } else {
+            setMessage(`❌ ${data.error}`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+          }
+        } catch (error) {
+          console.error('Claim error:', error);
+          setMessage('❌ Failed to claim bonus');
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
-          
-          if (onClaimed) onClaimed(data.bonus, data.newBalance);
+        } finally {
+          setClaiming(false);
         }
-        
-        setClaiming(false);
       })();
     }
   }, [txConfirmed, txHash, fid, onClaimed]);
+
+  // Obsługa błędu transakcji
+  useEffect(() => {
+    if (txFailed || txError) {
+      console.error('Transaction failed:', txError);
+      setMessage('❌ Transaction failed');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setClaiming(false);
+    }
+  }, [txFailed, txError]);
 
   return (
     <>
@@ -117,6 +142,7 @@ export default function DailyBonus({
           </p>
         </div>
 
+        {/* FREE option */}
         <div className="border border-gray-600 rounded-lg p-4">
           <div className="text-3xl font-bold text-yellow-400 mb-2">
             +100 pts
@@ -130,20 +156,25 @@ export default function DailyBonus({
           </button>
         </div>
 
+        {/* PAID option */}
         <div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
           <div className="text-3xl font-bold text-yellow-400 mb-2">
             +200 pts ⚡
           </div>
+          
           <button
             onClick={handleQuickClaim}
             disabled={claiming}
             className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
           >
-            {claiming ? 'Processing...' : `Quick Claim ($0.01)`}
+            {claiming ? 'Processing...' : 'Quick Claim (~$0.04)'}
           </button>
-          <p className="text-xs text-gray-400 mt-2">
-            Instant, no cooldown
-          </p>
+          
+          <div className="mt-3 text-xs text-gray-400 space-y-1">
+            <p>✓ Instant, no cooldown</p>
+            <p>✓ 0.00001 ETH + network fees</p>
+            <p className="text-gray-500">Voluntary • Entertainment only</p>
+          </div>
         </div>
 
         {streak > 0 && (
@@ -151,6 +182,11 @@ export default function DailyBonus({
             🔥 Current streak: {streak} days
           </div>
         )}
+        
+        <div className="text-xs text-gray-500 border-t border-gray-700 pt-4">
+          Points are for entertainment purposes only and have no monetary value.
+          All transactions are voluntary. Must be 18+.
+        </div>
       </div>
     </>
   );
