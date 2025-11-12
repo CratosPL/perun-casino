@@ -130,36 +130,44 @@ export default function DailyBonus({
           </button>
         </div>
 
-{/* PAID option */}
-<div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
-  <div className="text-3xl font-bold text-yellow-400 mb-2">
-    +200 pts ⚡
-  </div>
-  
-  {/* ✅ UPROŚCIŁEM - tylko payment */}
-  <div className="bg-black/20 rounded-lg p-3 mb-3">
-    <div className="text-sm text-white font-semibold mb-1">
-      Payment: 0.00001 ETH (~$0.03)
-    </div>
-    <div className="text-xs text-gray-400">
-      + minimal network fees (~$0.01)
-    </div>
-  </div>
-  
-  <button
-    onClick={handleQuickClaim}
-    disabled={claiming}
-    className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
-  >
-    {claiming ? 'Processing...' : `Quick Claim`}
-  </button>
-  
-  <div className="mt-3 text-xs text-gray-400 space-y-1">
-    <p>✓ Instant, no cooldown</p>
-    <p>✓ Optional micro-transaction</p>
-  </div>
-</div>
-
+        {/* PAID option */}
+        <div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
+          <div className="text-3xl font-bold text-yellow-400 mb-2">
+            +200 pts ⚡
+          </div>
+          
+          {/* ✅ NOWE: Szczegóły płatności */}
+          <div className="bg-black/20 rounded-lg p-3 mb-3 text-xs space-y-1">
+            <div className="flex justify-between text-gray-300">
+              <span>Payment:</span>
+              <span>0.00001 ETH (~$0.03)</span>
+            </div>
+            <div className="flex justify-between text-gray-300">
+              <span>Gas fee:</span>
+              <span>~0.00001 ETH (~$0.03)</span>
+            </div>
+            <div className="border-t border-gray-600 pt-1 mt-1"></div>
+            <div className="flex justify-between text-white font-semibold">
+              <span>Total:</span>
+              <span>~$0.06</span>
+            </div>
+          </div>
+          
+          <button
+            onClick={handleQuickClaim}
+            disabled={claiming}
+            className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
+          >
+            {claiming ? 'Processing...' : `Quick Claim`}
+          </button>
+          
+          {/* ✅ NOWE: Info o dobrowolności */}
+          <div className="mt-3 text-xs text-gray-400 space-y-1">
+            <p>✓ Instant, no cooldown</p>
+            <p>✓ Optional micro-transaction</p>
+            <p className="text-gray-500">Voluntary payment • Entertainment only</p>
+          </div>
+        </div>
 
         {streak > 0 && (
           <div className="text-sm text-gray-400">
