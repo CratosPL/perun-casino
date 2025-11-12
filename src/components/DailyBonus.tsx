@@ -4,7 +4,7 @@ import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 
 const PAYMENT_WALLET = '0xC950198D7fB2532BF9325Ef0d5bE82E5d555055C';
-const QUICK_CLAIM_AMOUNT = '0.00001';
+const QUICK_CLAIM_AMOUNT = '0.000005';
 
 export default function DailyBonus({ 
   fid, 
