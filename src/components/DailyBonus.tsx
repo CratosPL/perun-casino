@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react'; // ← dodany useEffect
+import { useState, useEffect } from 'react';
 import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 
 const PAYMENT_WALLET = '0xC950198D7fB2532BF9325Ef0d5bE82E5d555055C';
-const QUICK_CLAIM_AMOUNT = '0.00003';
+const QUICK_CLAIM_AMOUNT = '0.00001'; // ~$0.03 (lepiej widoczne)
 
 export default function DailyBonus({ 
   fid, 
@@ -70,7 +70,6 @@ export default function DailyBonus({
     }
   };
 
-  // ✅ POPRAWIONE: useEffect zamiast useState
   useEffect(() => {
     if (txConfirmed && txHash) {
       (async () => {
@@ -117,6 +116,7 @@ export default function DailyBonus({
           </p>
         </div>
 
+        {/* FREE option */}
         <div className="border border-gray-600 rounded-lg p-4">
           <div className="text-3xl font-bold text-yellow-400 mb-2">
             +100 pts
@@ -130,27 +130,48 @@ export default function DailyBonus({
           </button>
         </div>
 
-        <div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
-          <div className="text-3xl font-bold text-yellow-400 mb-2">
-            +200 pts ⚡
-          </div>
-          <button
-            onClick={handleQuickClaim}
-            disabled={claiming}
-            className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
-          >
-            {claiming ? 'Processing...' : `Quick Claim ($0.01)`}
-          </button>
-          <p className="text-xs text-gray-400 mt-2">
-            Instant, no cooldown
-          </p>
-        </div>
+{/* PAID option */}
+<div className="border border-yellow-500 rounded-lg p-4 bg-yellow-500/10">
+  <div className="text-3xl font-bold text-yellow-400 mb-2">
+    +200 pts ⚡
+  </div>
+  
+  {/* ✅ UPROŚCIŁEM - tylko payment */}
+  <div className="bg-black/20 rounded-lg p-3 mb-3">
+    <div className="text-sm text-white font-semibold mb-1">
+      Payment: 0.00001 ETH (~$0.03)
+    </div>
+    <div className="text-xs text-gray-400">
+      + minimal network fees (~$0.01)
+    </div>
+  </div>
+  
+  <button
+    onClick={handleQuickClaim}
+    disabled={claiming}
+    className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-lg hover:scale-105 disabled:opacity-50 transition-all"
+  >
+    {claiming ? 'Processing...' : `Quick Claim`}
+  </button>
+  
+  <div className="mt-3 text-xs text-gray-400 space-y-1">
+    <p>✓ Instant, no cooldown</p>
+    <p>✓ Optional micro-transaction</p>
+  </div>
+</div>
+
 
         {streak > 0 && (
           <div className="text-sm text-gray-400">
             🔥 Current streak: {streak} days
           </div>
         )}
+        
+        {/* ✅ NOWE: Disclaimer na dole */}
+        <div className="text-xs text-gray-500 border-t border-gray-700 pt-4">
+          Points are for entertainment purposes only and have no monetary value.
+          All transactions are voluntary. Must be 18+.
+        </div>
       </div>
     </>
   );

@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       hash: txHash as `0x${string}`
     })
     
-const minAmount = BigInt('30000000000000') // 0.00003 ETH in wei
+const minAmount = BigInt('10000000000000') // 0.00001 ETH
     if (txDetails.value < minAmount) {
       return Response.json({ error: 'Payment too low' }, { status: 400 })
     }
